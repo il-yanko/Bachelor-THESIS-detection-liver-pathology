@@ -1,30 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
-from pyentrp import entropy as ent
 import os, os.path
 import glcm
+import pe
+import gradients as grds
 from PIL import Image
 
-#permutation entropy
-def greyPicPE (picture,normalize,order = 3,delay = 1):
-    length  = len(picture)
-    PEnt    = np.zeros(length)
-    for i in range (length):
-        tempStr         = picture[i]
-        PEnt[i] = ent.permutation_entropy(tempStr,order,delay,normalize)
-    return (PEnt)
-def calculateDiffPEvalues(BMP):
-    lengh = len(BMP)
-    PEnormalized   = np.zeros(lengh)
-    PEmid          = np.zeros(lengh)
-    for i in range(lengh):
-        currentPicPE       = greyPicPE(BMP[i], True,5,1)
-        PEnormalized[i]    = np.round(ent.permutation_entropy(currentPicPE, 4, 1, True), 3)
-        PEmid[i]           = np.mean(currentPicPE).round(3)
-    print('The normalized permutation entropy:\n', PEnormalized)
-    print('The mean permutation entropy:\n', PEmid,'\n')
-    return PEnormalized,PEmid
 #download folder BMP
 def getBMP(fullDir,lastDir):
     # считаем количество изображений
@@ -107,7 +89,8 @@ normaLast = "norma/"
 normaBMP = getBMP(normaFull,normaLast)
 for i in range (len(normaBMP)):
     normaBMP[i] = rgb2gray(normaBMP[i])
-
+'''
+'''
 #========рабочие рассчеты PERMUTATION ENTROPY========
 print('\nPathological specimens')
 pathoPEnzed, pathoPEmid = calculateDiffPEvalues(pathoBMP)
@@ -121,23 +104,54 @@ plt.legend()
 ##============================================
 '''
 #считывание 1го изображение для тестов
-original = mpimg.imread("pathology/5.bmp")
-original = original[0:20,0:20,:]
+original = mpimg.imread("norma/5.bmp")
+# original = original[0:20,0:20,:]
 #plt.subplot(211)
 #plt.imshow(original)
 #plt.title("Оригінальне зображення")
-plt.imsave("norma/tmp1.png",original)
+plt.imsave("tmp/tmp1.png", original)
 rawGray = rgb2gray(original)
-#test = np.array([[1,2,3,2,4], [5,3,2,1,1], [3,2,1,2,1], [1,1,5,2,1], [2,5,4,1,3]])
 gray = np.array(rawGray)
-calculation = glcm.GLCM(gray).glcm_complex_duplex()
+#calculation = glcm.GLCM(gray).glcm_complex_duplex()
 grCoMap = plt.get_cmap('gray')
-plt.imshow(calculation,cmap=grCoMap)
-plt.imsave("norma/tmp2.png",gray, cmap=grCoMap)
+# GLCM
+
+fig = plt.figure()
+ax = fig.add_subplot(311)
+ax.imshow(gray, cmap=grCoMap)
+# ax.title("Original")
+# plt.imshow(calculation,cmap=grCoMap)
+# plt.imsave("tmp/tmp2.png",gray, cmap=grCoMap)
+
+dif = grds.gradient(gray)
+plt.subplot(323)
+dif.computeHorizontal()
+plt.imshow(dif.getHorizontal())
+plt.title("Horizontal")
+
+plt.subplot(324)
+dif.computeVertical()
+plt.imshow(dif.getVertical())
+plt.title("Vertical")
+
+plt.subplot(325)
+dif.computeDiagonal135()
+plt.imshow(dif.getDiagonal135())
+plt.title("Diagonal135")
+
+plt.subplot(326)
+dif.computeDiagonal45()
+plt.imshow(dif.getDiagonal45())
+plt.title("Diagonal45")
+fig.tight_layout()
+
+fig.savefig("tmp/spec.pdf")
+
+
 '''
 #===========спроба фарбувати ПІЛ===========
 #img = Image.fromarray(grayAsRGB.astype(np.uint8))
-img = Image.open("norma/tmp2.png")
+img = Image.open("tmp/tmp2.png")
 plt.subplot(312)
 plt.imshow(np.array(img))
 plt.title("Аугментоване зображення")
@@ -177,17 +191,18 @@ for i in range (len(ed)-1):
                             paintPixelPIL(img, i, j, 0, 0, 90)
                             paintPixelPIL(img, i, j + 1, 0, 0, 90)
 
-img.save("norma/colorized.png", "PNG", quality = 100)
+img.save("tmp/colorized.png", "PNG", quality = 100)
 im2arr = np.array(img)
 plt.subplot(313)
 plt.imshow(im2arr)
 plt.title("Зображення, покрите маскою на основі GLCM")
 '''
 
+'''
 plt.title("Color-Color symmetrical GLCM")
 plt.xlabel("color1")
 plt.ylabel("color2")
 #plt.legend()
+'''
 
-plt.tight_layout()
 plt.show()
