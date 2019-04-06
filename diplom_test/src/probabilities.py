@@ -32,8 +32,59 @@ class GLCMEquations:
     def __init__(self, matrix):
         self.matrix = matrix
 
+    # f1
     def energy(self):
         return np.sum(np.power(self.matrix.flatten(), 2))
+
+    # f2
+    def contrast(self):
+        pass
+
+    # f3
+    def correlation(self):
+        return np.corrcoef(self.matrix)
+
+    # f4
+    def variance(self):
+        mean = self.matrix.flatten().mean()
+
+        result = 0
+        for i in range(self.matrix.shape[0]):
+            for j in range(self.matrix.shape[1]):
+                result += (i - mean) ** 2 * self.matrix[i][j]
+        return result
+
+    # f5
+    def inverse_difference_moment(self):
+        pass
+
+    # f6
+    def sum_average(self):
+        pass
+
+    # f7
+    def sum_variance(self):
+        pass
+
+    # f8
+    def sum_entropy(self):
+        pass
+
+    # f9
+    def entropy(self):
+        pass
+
+    # f10
+    def differnce_variance(self):
+        pass
+
+    # f11
+    def differnce_entropy(self):
+        pass
+
+    # f14
+    def max_correlation_coeff(self):
+        pass
 
 glcm = GLCM(images[0])
 
@@ -43,3 +94,4 @@ p = count_probabilities_arr(g)
 
 gleq = GLCMEquations(p)
 print("Energy: ", gleq.energy())
+print("Variance:", gleq.variance())
