@@ -1,6 +1,5 @@
 from os import listdir
 import glob
-import imageio
 import numpy as np
 from PIL import Image
 
@@ -16,13 +15,9 @@ class IMGReader:
         images_name = []
         images = []
         try:
-            # images = [np.asarray(imageio.imread(img_path, as_gray=True), dtype=np.uint8)
-            #           for img_path in glob.glob(dir_path + "*" + (("." + format) if format else ""))]
             images = [np.asarray(Image.open(img_path).convert('L'), dtype=np.uint8)
                       for img_path in glob.glob(dir_path + "*" + (("." + format) if format else ""))]
             images_name = listdir(dir_path)
         except Exception as e:
             print(e)
-
-        # images = map(np.ndarray.astype(np.uint8), images)
         return images_name, images
