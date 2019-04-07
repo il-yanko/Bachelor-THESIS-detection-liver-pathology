@@ -1,20 +1,16 @@
 from sklearn.preprocessing import normalize
 from glcm import GLCM
 from img_reader import IMGReader
+
 import numpy as np
 
-PROJECT_PWD = "/Volumes/Storage/goinfre/ikachko/algorithm-detects-liver-pathology/diplom_test"
+PROJECT_PWD = "/Users/ikachko/Diploma/algorithm-detects-liver-pathology/diplom_test"
 
 NORMA_DIR = PROJECT_PWD + "/norma/"
 PATHOLOGY_DIR = PROJECT_PWD + "/pathology/"
 
 img_names, images = IMGReader.read_directory(NORMA_DIR)
 
-# def normalize_color(matrix):
-#     for row
-#     return normalize(matrix, axis)
-
-# print(type(images[0]))
 
 def count_probabilities_arr(array):
     print(array)
@@ -38,22 +34,45 @@ class GLCMEquations:
 
     # f2
     def contrast(self):
-        pass
+        res_contrast = 0
+
+        for i in range(self.matrix.shape[0]):
+            for j in range(self.matrix.shape[1]):
+                res_contrast += self.matrix[i][j] * (i - j) ** 2
+        return res_contrast
+
+    def homogenity(self):
+        res_homog = 0
+
+        for i in range(self.matrix.shape[0]):
+            for j in range(self.matrix.shape[1]):
+                res_homog += self.matrix[i][j]/(1 + (i - j) ** 2)
+
+        return res_homog
 
     # f3
     def correlation(self):
-        return np.corrcoef(self.matrix)
+        variance = self.variance()
+        mean = self.mean()
 
+        res_corr = 0
+        for i in range(self.matrix.shape[0]):
+            for j in range(self.matrix.shape[1]):
+                res_corr += self.matrix[i][j]\
+                           * (((i - mean) * (j - mean)) / variance**2)
+        return res_corr
+
+    def mean(self):
+        return self.matrix.flatten().mean()
     # f4
     def variance(self):
-        mean = self.matrix.flatten().mean()
+        mean = self.mean()
 
         result = 0
         for i in range(self.matrix.shape[0]):
             for j in range(self.matrix.shape[1]):
                 result += (i - mean) ** 2 * self.matrix[i][j]
         return result
-
     # f5
     def inverse_difference_moment(self):
         pass
@@ -72,7 +91,12 @@ class GLCMEquations:
 
     # f9
     def entropy(self):
-        pass
+        res_entr = 0
+        for i in range(self.matrix.shape[0]):
+            for j in range(self.matrix.shape[1]):
+                if self.matrix[i][j] != 0:
+                    res_entr += -np.log(self.matrix[i][j]) * self.matrix[i][j]
+        return res_entr
 
     # f10
     def differnce_variance(self):
@@ -91,7 +115,11 @@ glcm = GLCM(images[0])
 g = glcm.glcm_complex()
 
 p = count_probabilities_arr(g)
-
+#
 gleq = GLCMEquations(p)
 print("Energy: ", gleq.energy())
+print("Contrast: ", gleq.contrast())
+print("Homogenity: ", gleq.homogenity())
+print("Correlation: ", gleq.correlation())
 print("Variance:", gleq.variance())
+print("Entropy: ", gleq.entropy())
