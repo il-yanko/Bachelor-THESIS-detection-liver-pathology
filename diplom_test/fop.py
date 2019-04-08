@@ -1,4 +1,4 @@
-# this class implements the checker of the FRP (form of regulatory patterns)
+# this class implements the checker of the FOP (form of ordinal patterns)
 
 class tripleEvaluator:
     # stability deviation:

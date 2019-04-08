@@ -6,15 +6,16 @@ import glcm
 import pe
 import gradients as grds
 from PIL import Image
+import math
 
 #download folder BMP
-def getBMP(fullDir, lastDir):
+def getBMP(fullDir):
     # считаем количество изображений
     fileNumber = len(next(os.walk(fullDir))[2])
     print(fileNumber, "pictures were found")
     imgArr = []
     for i in range(1, fileNumber + 1):
-        imgArr.append(mpimg.imread(lastDir + str(i) + ".bmp"))
+        imgArr.append(mpimg.imread(fullDir + '/' + str(i) + ".bmp"))
     print(len(imgArr), "image was read")
     #дописать исключения
     return imgArr
@@ -81,56 +82,76 @@ def normalizeArray2D(table):
     return rez
 
 
+# getting the current working directory
+cwd = os.getcwd()
+
 # reading of our images
 print("Donwloading images for a pathological and a normal state of a kidney parenchyma for our ultrasonography:")
-pathoFull = "C:/Users/admin/PycharmProject/algorithm-detects-liver-pathology/diplom_test/pathology"
-pathoLast = "pathology/"
-pathoBMP = getBMP(pathoFull,pathoLast)
+pathoFull = cwd + "/pathology"
+pathoBMP = getBMP(pathoFull)
 for i in range (len(pathoBMP)):
     pathoBMP[i] = rgb2gray(pathoBMP[i])
-normaFull = "C:/Users/admin/PycharmProject/algorithm-detects-liver-pathology/diplom_test/norma"
-normaLast = "norma/"
-normaBMP = getBMP(normaFull,normaLast)
+
+normaFull = cwd + "/norma"
+normaBMP = getBMP(normaFull)
 for i in range (len(normaBMP)):
     normaBMP[i] = rgb2gray(normaBMP[i])
 
-# PERMUTATION ENTROPY calculations and processing
+# auh = autoimmune hepatitis
+auhFull = cwd + "/unCheckPatho/auh"
+auhBMP = getBMP(auhFull)
+for i in range(len(auhBMP)):
+    auhBMP[i] = rgb2gray(auhBMP[i])
+
+# PE works but have NO sense
+'''
+# PERMUTATION ENTROPY and ordinal patterns calculations and processing
 patternNumber = 5
-patternAXIS1 = 2
-patternAXIS2 = 3
+#min, max, increasing, decreasing, stability
+patternAXIS1 = 1
+patternAXIS2 = 4
+AXIS1name = "МАКСИМУМ, %"
+AXIS2name = "СТАБІЛЬНІСТЬ, %"
 
 print('\nPathological specimens')
 pathoPEpatterns = np.zeros((1, patternNumber))
 for i in range(len(pathoBMP)):
     tmp = pe.pe(pathoBMP[i])
-    tmp.PErawAnalysis()
+    tmp.PErawAnalysis(10)
+    # это чтобы добавить 1 (!!!) отметку в легенду, мб исправить потом
+    # НАДО перейти к scatter (!!!)
+    plt.plot(tmp.rez[0][patternAXIS1],
+             tmp.rez[0][patternAXIS2],
+             'ro')
+    #label='pathological SAMPLES'
     for j in range(patternNumber):
         pathoPEpatterns[0][j] += tmp.rez[0][j]
-        plt.plot(tmp.rez[0][patternAXIS1],
-                 tmp.rez[0][patternAXIS2],
-                 'ro')
+
 for k in range(patternNumber):
     pathoPEpatterns[0][k] /= len(pathoBMP)
 plt.plot(pathoPEpatterns[0][patternAXIS1],
          pathoPEpatterns[0][patternAXIS2],
-         'rs', label='pathological AVERAGE')
+         'r*', label='pathological AVERAGE',
+         markersize=30)
 print(pathoPEpatterns)
 
 print('Normal specimens')
 normaPEpatterns = np.zeros((1, patternNumber))
 for i in range(len(normaBMP)):
     tmp = pe.pe(normaBMP[i])
-    tmp.PErawAnalysis()
+    tmp.PErawAnalysis(10)
+    plt.plot(tmp.rez[0][patternAXIS1],
+             tmp.rez[0][patternAXIS2],
+             'b^')
     for j in range(patternNumber):
         normaPEpatterns[0][j] += tmp.rez[0][j]
-        plt.plot(tmp.rez[0][patternAXIS1],
-                 tmp.rez[0][patternAXIS2],
-                 'g^')
+
 for k in range(patternNumber):
     normaPEpatterns[0][k] /= len(normaBMP)
-plt.plot(pathoPEpatterns[0][patternAXIS1],
-         pathoPEpatterns[0][patternAXIS2],
-         'gs', label='normal AVERAGE')
+plt.plot(normaPEpatterns[0][patternAXIS1],
+         normaPEpatterns[0][patternAXIS2],
+         'b*', label='normal AVERAGE',
+         markersize=30)
 print(normaPEpatterns)
 
 perc = np.zeros((1, patternNumber))
@@ -140,14 +161,89 @@ for i in range(patternNumber):
 print('Normalized difference in percents:')
 print(perc)
 
-plt.xlabel("ЗРОСТАННЯ, %")
-plt.ylabel("СПАДАННЯ, %")
+plt.xlabel(AXIS1name)
+plt.ylabel(AXIS2name)
 plt.legend()
-
-# считывание 1го изображение для тестов
+plt.savefig('ordinal_patterns.png')
 '''
-original = mpimg.imread("pathology/5.bmp")
-original = original[0:20,0:20,:]
+
+fig = plt.figure(figsize=(10, 10), dpi=80, facecolor='w', edgecolor='k')
+# grCoMap = plt.get_cmap('gray')
+
+# 5x5 картинок
+'''
+columns = 5
+rows    = math.ceil(len(pathoBMP) / columns)
+for i in range(len(normaBMP)):
+    curIm = normaBMP[i]
+    #curIm = curIm[0:3,0:3]
+    #plt.imshow(curIm)
+    curRow, curCol = 0, 0
+    calculation = glcm.GLCM(curIm).glcm_complex_duplex()
+    number = i+1
+    print(rows,columns,number)
+    fig.add_subplot(rows,columns,number)
+    plt.imshow(calculation)
+    plt.tight_layout()
+plt.savefig('norma.png')
+'''
+
+# сохран всех 50 картинок глцм в папку временных
+'''
+for i in range(len(normaBMP)):
+    curIm = normaBMP[i]
+    calculation = glcm.GLCM(curIm).glcm_complex_duplex()
+    number = i+1
+    print(number)
+    plt.imshow(calculation)
+    path = "glcm/n/n" + str(number) + ".png"
+    plt.imsave(path, calculation, cmap="inferno")
+print("norma was saved sucessfull")
+for i in range(len(pathoBMP)):
+    curIm = pathoBMP[i]
+    calculation = glcm.GLCM(curIm).glcm_complex_duplex()
+    number = i+1
+    print(number)
+    plt.imshow(calculation)
+    path = "glcm/p/p" + str(number) + ".png"
+    plt.imsave(path, calculation, cmap="inferno")
+print("pathology was saved sucessfull")
+'''
+
+for i in range(len(normaBMP)):
+    curIm = normaBMP[i]
+    calculation = glcm.GLCM(curIm).glcm_complex_duplex()
+    number = i + 1
+    print(number)
+    # plt.imshow(calculation)
+    path = "glcm/n/n" + str(number) + ".csv"
+    np.savetxt(path, calculation, fmt="%d", delimiter=",")
+for i in range(len(pathoBMP)):
+    curIm = pathoBMP[i]
+    calculation = glcm.GLCM(curIm).glcm_complex_duplex()
+    number = i + 1
+    print(number)
+    # plt.imshow(calculation)
+    path = "glcm/p/p" + str(number) + ".csv"
+    np.savetxt(path, calculation, fmt="%d", delimiter=",")
+for i in range(len(auhBMP)):
+    curIm = auhBMP[i]
+    calculation = glcm.GLCM(curIm).glcm_complex_duplex()
+    number = i + 1
+    print(number)
+    # plt.imshow(calculation)
+    path = "glcm/auh/auh" + str(number) + ".csv"
+    np.savetxt(path, calculation, fmt="%d", delimiter=",")
+
+## GLCM results' saving
+# plt.imsave("tmp/tmp2.png",gray, cmap=grCoMap)
+
+
+'''
+# считывание 1го изображение для тестов
+original = mpimg.imread("pathology/14.bmp")
+#original = original[0:20,0:20,:]
+fig = plt.figure()
 #plt.subplot(211)
 #plt.imshow(original)
 #plt.title("Оригінальне зображення")
@@ -155,14 +251,17 @@ plt.imsave("tmp/tmp1.png", original)
 rawGray = rgb2gray(original)
 gray = np.array(rawGray)
 calculation = glcm.GLCM(gray).glcm_complex_duplex()
-grCoMap = plt.get_cmap('gray')
+#grCoMap = plt.get_cmap('gray')
+ax = fig.add_subplot(111)
 # GLCM results' saving
-#plt.imshow(calculation,cmap=grCoMap)
+plt.imshow(calculation)
+#cmap=grCoMap
+
 #plt.imsave("tmp/tmp2.png",gray, cmap=grCoMap)
+'''
 
-
-fig = plt.figure()
-ax = fig.add_subplot(311)
+'''
+ax = fig.add_subplot(212)
 plt.imshow(gray, cmap=grCoMap)
 plt.title("Original")
 '''
