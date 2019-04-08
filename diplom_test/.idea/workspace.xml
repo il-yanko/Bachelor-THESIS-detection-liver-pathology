@@ -1,15 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="a911c008-decf-48ad-826d-8b87247995ac" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/dictionaries/ADMIN.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frp.py" beforeDir="false" afterPath="$PROJECT_DIR$/fop.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pe.py" beforeDir="false" afterPath="$PROJECT_DIR$/pe.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tmp/tmp1.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tmp/tmp2.png" beforeDir="false" />
-    </list>
+    <list default="true" id="a911c008-decf-48ad-826d-8b87247995ac" name="Default" comment="disabled the permutation entropy and added slow processing of all pictures into glcm and saving as .csv files" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,8 +36,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="390">
-              <caret line="233" column="17" lean-forward="true" selection-start-line="233" selection-start-column="17" selection-end-line="233" selection-end-column="17" />
+            <state relative-caret-position="127">
+              <caret line="232" column="17" lean-forward="true" selection-start-line="232" selection-start-column="17" selection-end-line="232" selection-end-column="17" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
                 <element signature="e#3007#4924#1" />
@@ -304,7 +296,7 @@
       <updated>1544860729503</updated>
       <workItem from="1554639257636" duration="21253000" />
       <workItem from="1554714478660" duration="1151000" />
-      <workItem from="1554735272003" duration="3877000" />
+      <workItem from="1554735272003" duration="4137000" />
     </task>
     <task id="LOCAL-00001" summary="added function to calculate difference between neighbour cells in array (for my image contrasting)">
       <created>1553724698370</created>
@@ -341,11 +333,25 @@
       <option name="project" value="LOCAL" />
       <updated>1554367175252</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="changed the using of the permutation entropy&#10;tried to have a look at the different patterns probability in the image and chose two of them were the most different in patho- and normal groups">
+      <created>1554739333313</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1554739333313</updated>
+    </task>
+    <task id="LOCAL-00007" summary="disabled the permutation entropy and added slow processing of all pictures into glcm and saving as .csv files">
+      <created>1554739534521</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1554739534521</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="26281000" />
+    <option name="totallyTimeSpent" value="26541000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -358,9 +364,8 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1295" height="695" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.73134327" visible="true" weight="0.15117219" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.73134327" visible="true" weight="0.15117219" />
       <window_info id="Structure" order="1" sideWeight="0.4950249" weight="0.24972972" />
       <window_info id="Favorites" order="2" sideWeight="0.26865673" side_tool="true" weight="0.09621622" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -370,7 +375,7 @@
       <window_info anchor="bottom" id="Inspection" order="4" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="5" weight="0.12609239" />
       <window_info anchor="bottom" id="Event Log" order="6" sideWeight="0.50216216" side_tool="true" weight="0.3297619" />
-      <window_info anchor="bottom" id="Version Control" order="7" weight="0.13059701" />
+      <window_info active="true" anchor="bottom" id="Version Control" order="7" visible="true" weight="0.5526802" />
       <window_info anchor="bottom" id="Python Console" order="8" weight="0.3297619" />
       <window_info anchor="bottom" id="Terminal" order="9" weight="0.09761905" />
       <window_info anchor="bottom" id="Concurrent Activities Diagram" order="10" visible="true" weight="0.32921347" />
@@ -419,7 +424,8 @@
     <MESSAGE value="parts of code was separated (gradient, permutation entropy)&#10;currently main part is creating .pdf with different gradients of the core image" />
     <MESSAGE value="created a folder for results and temporary data" />
     <MESSAGE value="changed the using of the permutation entropy&#10;tried to have a look at the different patterns probability in the image and chose two of them were the most different in patho- and normal groups" />
-    <option name="LAST_COMMIT_MESSAGE" value="changed the using of the permutation entropy&#10;tried to have a look at the different patterns probability in the image and chose two of them were the most different in patho- and normal groups" />
+    <MESSAGE value="disabled the permutation entropy and added slow processing of all pictures into glcm and saving as .csv files" />
+    <option name="LAST_COMMIT_MESSAGE" value="disabled the permutation entropy and added slow processing of all pictures into glcm and saving as .csv files" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">
@@ -598,8 +604,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="390">
-          <caret line="233" column="17" lean-forward="true" selection-start-line="233" selection-start-column="17" selection-end-line="233" selection-end-column="17" />
+        <state relative-caret-position="127">
+          <caret line="232" column="17" lean-forward="true" selection-start-line="232" selection-start-column="17" selection-end-line="232" selection-end-column="17" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
             <element signature="e#3007#4924#1" />
