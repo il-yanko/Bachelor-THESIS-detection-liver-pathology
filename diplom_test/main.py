@@ -173,7 +173,7 @@ fig = plt.figure(figsize=(10, 10), dpi=80, facecolor='w', edgecolor='k')
 # 5x5 картинок
 '''
 columns = 5
-rows    = math.ceil(len(pathoBMP) / columns)
+rows    = math.ceil(len(normaBMP) / columns)
 for i in range(len(normaBMP)):
     curIm = normaBMP[i]
     #curIm = curIm[0:3,0:3]
@@ -185,7 +185,7 @@ for i in range(len(normaBMP)):
     fig.add_subplot(rows,columns,number)
     plt.imshow(calculation)
     plt.tight_layout()
-plt.savefig('norma.png')
+plt.savefig('tmp/norma.png')
 '''
 
 # сохран всех 50 картинок глцм в папку временных
@@ -348,4 +348,4 @@ plt.ylabel("color2")
 #plt.legend()
 '''
 
-plt.show()
+# plt.show()
