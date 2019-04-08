@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="a911c008-decf-48ad-826d-8b87247995ac" name="Default" comment="changed folders order" />
+    <list default="true" id="a911c008-decf-48ad-826d-8b87247995ac" name="Default" comment="deleted empty folders">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
+    <list id="e4daaef4-688e-4c30-890d-01c0ed692fe3" name="Apply: changed folders order" comment="Apply: changed folders order" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,8 +39,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="299">
-              <caret line="349" selection-start-line="349" selection-end-line="349" />
+            <state relative-caret-position="271">
+              <caret line="351" selection-start-line="351" selection-end-line="351" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -48,8 +51,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/.gitignore">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="443">
-              <caret line="38" column="20" selection-start-line="38" selection-start-column="20" selection-end-line="38" selection-end-column="20" />
+            <state relative-caret-position="51">
+              <caret line="3" column="7" lean-forward="true" selection-start-line="3" selection-start-column="7" selection-end-line="3" selection-end-column="7" />
             </state>
           </provider>
         </entry>
@@ -69,6 +72,7 @@
     </dirStrings>
   </component>
   <component name="Git.Settings">
+    <option name="UPDATE_CHANGES_POLICY" value="SHELVE" />
     <option name="ROOT_SYNC" value="DONT_SYNC" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
@@ -85,15 +89,16 @@
         <option value="$PROJECT_DIR$/tmp/frp.py" />
         <option value="$PROJECT_DIR$/frp.py" />
         <option value="$PROJECT_DIR$/pe.py" />
-        <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/main.py" />
+        <option value="$PROJECT_DIR$/glcm/auh/csv/auh2.csv" />
+        <option value="$PROJECT_DIR$/.gitignore" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-8" />
-    <option name="width" value="551" />
-    <option name="height" value="417" />
+    <option name="x" value="-12" />
+    <option name="width" value="828" />
+    <option name="height" value="627" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -107,29 +112,6 @@
             <path>
               <item name="diplom_test" type="b2602c69:ProjectViewProjectNode" />
               <item name="diplom_test" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="diplom_test" type="b2602c69:ProjectViewProjectNode" />
-              <item name="diplom_test" type="462c0819:PsiDirectoryNode" />
-              <item name="glcm" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="diplom_test" type="b2602c69:ProjectViewProjectNode" />
-              <item name="diplom_test" type="462c0819:PsiDirectoryNode" />
-              <item name="glcm" type="462c0819:PsiDirectoryNode" />
-              <item name="auh" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="diplom_test" type="b2602c69:ProjectViewProjectNode" />
-              <item name="diplom_test" type="462c0819:PsiDirectoryNode" />
-              <item name="glcm" type="462c0819:PsiDirectoryNode" />
-              <item name="n" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="diplom_test" type="b2602c69:ProjectViewProjectNode" />
-              <item name="diplom_test" type="462c0819:PsiDirectoryNode" />
-              <item name="glcm" type="462c0819:PsiDirectoryNode" />
-              <item name="p" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -301,6 +283,7 @@
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="a911c008-decf-48ad-826d-8b87247995ac" name="Default" comment="" />
+      <changelist id="e4daaef4-688e-4c30-890d-01c0ed692fe3" name="Apply: changed folders order" comment="" />
       <created>1544860729503</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
@@ -308,7 +291,10 @@
       <workItem from="1554639257636" duration="21253000" />
       <workItem from="1554714478660" duration="1151000" />
       <workItem from="1554735272003" duration="10636000" />
-      <workItem from="1554750857146" duration="1771000" />
+      <workItem from="1554750857146" duration="2803000" />
+      <workItem from="1554754691451" duration="793000" />
+      <workItem from="1554757772321" duration="108000" />
+      <workItem from="1554757913514" duration="50000" />
     </task>
     <task id="LOCAL-00001" summary="added function to calculate difference between neighbour cells in array (for my image contrasting)">
       <created>1553724698370</created>
@@ -394,11 +380,25 @@
       <option name="project" value="LOCAL" />
       <updated>1554752074263</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="changed folders order">
+      <created>1554753742945</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1554753742945</updated>
+    </task>
+    <task id="LOCAL-00014" summary="deleted empty folders">
+      <created>1554757829589</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1554757829592</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="34811000" />
+    <option name="totallyTimeSpent" value="36794000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -410,9 +410,10 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="1295" height="695" extended-state="7" />
+    <frame x="-7" y="-7" width="1295" height="695" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.73134327" visible="true" weight="0.20291026" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.73134327" visible="true" weight="0.16895716" />
       <window_info id="Structure" order="1" sideWeight="0.4950249" weight="0.24972972" />
       <window_info id="Favorites" order="2" sideWeight="0.26865673" side_tool="true" weight="0.09621622" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -422,9 +423,9 @@
       <window_info anchor="bottom" id="Inspection" order="4" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="5" weight="0.12569316" />
       <window_info anchor="bottom" id="Event Log" order="6" sideWeight="0.50216216" side_tool="true" weight="0.3297619" />
-      <window_info anchor="bottom" id="Version Control" order="7" weight="0.26432532" />
-      <window_info anchor="bottom" id="Python Console" order="8" visible="true" weight="0.081330866" />
-      <window_info anchor="bottom" id="Terminal" order="9" weight="0.09761905" />
+      <window_info anchor="bottom" id="Version Control" order="7" weight="0.059149724" />
+      <window_info anchor="bottom" id="Python Console" order="8" weight="0.081330866" />
+      <window_info anchor="bottom" id="Terminal" order="9" visible="true" weight="0.2698706" />
       <window_info anchor="bottom" id="Concurrent Activities Diagram" order="10" visible="true" weight="0.32921347" />
       <window_info anchor="bottom" id="Docker" order="11" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="12" />
@@ -465,6 +466,46 @@
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="RECENTLY_FILTERED_USER_GROUPS">
+                <collection />
+              </option>
+              <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+                <collection />
+              </option>
+              <option name="COLUMN_ORDER">
+                <list>
+                  <option value="0" />
+                  <option value="1" />
+                  <option value="2" />
+                  <option value="3" />
+                </list>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list />
+          </value>
+        </entry>
+        <entry key="User">
+          <value>
+            <list />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="SHOW_UNVERSIONED_FILES_WHILE_COMMIT" value="false" />
@@ -477,7 +518,8 @@
     <MESSAGE value="calculated glcm-s and saved as .csv" />
     <MESSAGE value="calculated glcm-s as .csv" />
     <MESSAGE value="changed folders order" />
-    <option name="LAST_COMMIT_MESSAGE" value="changed folders order" />
+    <MESSAGE value="deleted empty folders" />
+    <option name="LAST_COMMIT_MESSAGE" value="deleted empty folders" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">
@@ -642,9 +684,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/glcm/n/n1.csv">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/glcm/n/n1.csv" />
     <entry file="file://$PROJECT_DIR$/tmp/norma.png">
       <provider selected="true" editor-type-id="images" />
     </entry>
@@ -654,29 +694,26 @@
     <entry file="file://$PROJECT_DIR$/tmp/patho.png">
       <provider selected="true" editor-type-id="images" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/glcm/p/p1.csv">
+    <entry file="file://$PROJECT_DIR$/glcm/p/p1.csv" />
+    <entry file="file://$PROJECT_DIR$/glcm/auh/auh7.csv" />
+    <entry file="file://$PROJECT_DIR$/glcm/n/n3.csv" />
+    <entry file="file://$PROJECT_DIR$/glcm/auh/csv/auh2.csv">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="299">
-          <caret line="349" selection-start-line="349" selection-end-line="349" />
+        <state relative-caret-position="271">
+          <caret line="351" selection-start-line="351" selection-end-line="351" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/glcm/auh/auh7.csv">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/glcm/n/n3.csv">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="443">
-          <caret line="38" column="20" selection-start-line="38" selection-start-column="20" selection-end-line="38" selection-end-column="20" />
+        <state relative-caret-position="51">
+          <caret line="3" column="7" lean-forward="true" selection-start-line="3" selection-start-column="7" selection-end-line="3" selection-end-column="7" />
         </state>
       </provider>
     </entry>
