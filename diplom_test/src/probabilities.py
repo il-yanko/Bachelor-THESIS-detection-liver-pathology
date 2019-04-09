@@ -3,14 +3,17 @@ from glcm import GLCM
 from img_reader import IMGReader
 
 import numpy as np
+import pandas as pd
 
-PROJECT_PWD = "/Users/ikachko/Diploma/algorithm-detects-liver-pathology/diplom_test"
+PROJECT_PWD = "/Users/ilyakachko/Diploma/diplom_test"
+
+# PROJECT_PWD = "/Users/ikachko/Diploma/algorithm-detects-liver-pathology/diplom_test"
 
 NORMA_DIR = PROJECT_PWD + "/norma/"
 PATHOLOGY_DIR = PROJECT_PWD + "/pathology/"
 
-img_names, images = IMGReader.read_directory(NORMA_DIR)
-
+norma_imgs_names, norma_imgs = IMGReader.read_directory(NORMA_DIR)
+pathology_img_names, pathology_imgs = IMGReader.read_directory(PATHOLOGY_DIR)
 
 def count_probabilities_arr(array):
     print(array)
@@ -110,16 +113,59 @@ class GLCMEquations:
     def max_correlation_coeff(self):
         pass
 
-glcm = GLCM(images[0])
+dict_glcm_0 = {
+    'name': [],
+    'energy': [],
+    'contrast': [],
+    'homogenity': [],
+    'correlation': [],
+    'variance': [],
+    'entropy': [],
+    'pathology': []
+}
 
-g = glcm.glcm_complex()
+for name, img in zip(pathology_img_names, pathology_imgs):
+    dict_glcm_0['name'].append(name)
+    glcm = GLCM(img)
+    matrix = glcm.glcm_0()
 
-p = count_probabilities_arr(g)
-#
-gleq = GLCMEquations(p)
-print("Energy: ", gleq.energy())
-print("Contrast: ", gleq.contrast())
-print("Homogenity: ", gleq.homogenity())
-print("Correlation: ", gleq.correlation())
-print("Variance:", gleq.variance())
-print("Entropy: ", gleq.entropy())
+    probs = count_probabilities_arr(matrix)
+    glcm_eq = GLCMEquations(probs)
+    dict_glcm_0['energy'].append(glcm_eq.energy())
+    dict_glcm_0['contrast'].append(glcm_eq.contrast())
+    dict_glcm_0['homogenity'].append(glcm_eq.homogenity())
+    dict_glcm_0['correlation'].append(glcm_eq.correlation())
+    dict_glcm_0['variance'].append(glcm_eq.variance())
+    dict_glcm_0['entropy'].append(glcm_eq.entropy())
+    dict_glcm_0['pathology'].append(1)
+
+for name, img in zip(norma_imgs_names, norma_imgs):
+    dict_glcm_0['name'].append(name)
+    glcm = GLCM(img)
+    matrix = glcm.glcm_0()
+
+    probs = count_probabilities_arr(matrix)
+    glcm_eq = GLCMEquations(probs)
+    dict_glcm_0['energy'].append(glcm_eq.energy())
+    dict_glcm_0['contrast'].append(glcm_eq.contrast())
+    dict_glcm_0['homogenity'].append(glcm_eq.homogenity())
+    dict_glcm_0['correlation'].append(glcm_eq.correlation())
+    dict_glcm_0['variance'].append(glcm_eq.variance())
+    dict_glcm_0['entropy'].append(glcm_eq.entropy())
+    dict_glcm_0['pathology'].append(0)
+
+df_glcm_0 = pd.DataFrame(dict_glcm_0)
+
+
+print(df_glcm_0)
+# g = glcm.glcm_complex()
+
+# p = count_probabilities_arr(g)
+# #
+# gleq = GLCMEquations(p)
+# print("Energy: ", gleq.energy())
+# print("Contrast: ", gleq.contrast())
+# print("Homogenity: ", gleq.homogenity())
+# print("Correlation: ", gleq.correlation())
+# print("Variance:", gleq.variance())
+# print("Entropy: ", gleq.entropy())
