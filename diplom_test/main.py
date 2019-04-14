@@ -23,8 +23,6 @@ def getBMP(fullDir):
 def rgb2gray(rgb):
     #скалярное произведение начальных цветов с определенными теоретическими коэффициентами по системе YUV
     return np.dot(rgb[...,:3], [0.333, 0.333, 0.333]).round(3).astype(int)
-
-
 def averageRGB(img, windW, windH):
     #укрупним области
     w = len(img[0])
@@ -48,8 +46,6 @@ def averageRGB(img, windW, windH):
                     ed[i+a][j+b][1] = G
                     ed[i+a][j+b][2] = B
     return ed
-
-
 def averageGray(img, windW, windH):
     #укрупним области
     w = len(img[0])
@@ -69,6 +65,7 @@ def averageGray(img, windW, windH):
     return ed
 #normalization to the summ
 def normalizeArray2D(table):
+    # to divide each cell by the sum of all cells
     size1 = len(table)
     size2 = len(table[0])
     sum = 0
@@ -80,10 +77,11 @@ def normalizeArray2D(table):
         for j in range(size2):
             rez[i][j] = table[i][j]/sum
     return rez
-
-
 # getting the current working directory
 cwd = os.getcwd()
+
+
+
 
 # reading of our images
 print("Donwloading images for a pathological and a normal state of a kidney parenchyma for our ultrasonography:")
@@ -170,6 +168,31 @@ plt.savefig('ordinal_patterns.png')
 fig = plt.figure(figsize=(10, 10), dpi=80, facecolor='w', edgecolor='k')
 # grCoMap = plt.get_cmap('gray')
 
+# підрахунок та збереження GLCM-таблиць (.csv)
+'''
+for i in range(len(normaBMP)):
+    curIm = normaBMP[i]
+    calculation = glcm.GLCM(curIm).glcm_complex_duplex()
+    number = i + 1
+    print(number)
+    path = "glcm/n/n" + str(number) + ".csv"
+    np.savetxt(path, calculation, fmt="%d", delimiter=",")
+for i in range(len(pathoBMP)):
+    curIm = pathoBMP[i]
+    calculation = glcm.GLCM(curIm).glcm_complex_duplex()
+    number = i + 1
+    print(number)
+    path = "glcm/p/p" + str(number) + ".csv"
+    np.savetxt(path, calculation, fmt="%d", delimiter=",")
+for i in range(len(auhBMP)):
+    curIm = auhBMP[i]
+    calculation = glcm.GLCM(curIm).glcm_complex_duplex()
+    number = i + 1
+    print(number)
+    path = "glcm/auh/auh" + str(number) + ".csv"
+    np.savetxt(path, calculation, fmt="%d", delimiter=",")
+'''
+
 # 5x5 картинок
 '''
 columns = 5
@@ -210,30 +233,6 @@ for i in range(len(pathoBMP)):
 print("pathology was saved sucessfull")
 '''
 
-for i in range(len(normaBMP)):
-    curIm = normaBMP[i]
-    calculation = glcm.GLCM(curIm).glcm_complex_duplex()
-    number = i + 1
-    print(number)
-    # plt.imshow(calculation)
-    path = "glcm/n/n" + str(number) + ".csv"
-    np.savetxt(path, calculation, fmt="%d", delimiter=",")
-for i in range(len(pathoBMP)):
-    curIm = pathoBMP[i]
-    calculation = glcm.GLCM(curIm).glcm_complex_duplex()
-    number = i + 1
-    print(number)
-    # plt.imshow(calculation)
-    path = "glcm/p/p" + str(number) + ".csv"
-    np.savetxt(path, calculation, fmt="%d", delimiter=",")
-for i in range(len(auhBMP)):
-    curIm = auhBMP[i]
-    calculation = glcm.GLCM(curIm).glcm_complex_duplex()
-    number = i + 1
-    print(number)
-    # plt.imshow(calculation)
-    path = "glcm/auh/auh" + str(number) + ".csv"
-    np.savetxt(path, calculation, fmt="%d", delimiter=",")
 
 ## GLCM results' saving
 # plt.imsave("tmp/tmp2.png",gray, cmap=grCoMap)
