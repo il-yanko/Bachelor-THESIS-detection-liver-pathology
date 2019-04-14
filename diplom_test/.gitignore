@@ -38,5 +38,7 @@ Thumbs.db
 
 # IntellijIdea files
 *.iml
-.idea
-out
+__pycache__/
+*.py[cod]
+.idea/
+workspace.xml
