@@ -1,1 +1,0 @@
-# algorithm detects liver pathology
