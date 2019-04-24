@@ -80,8 +80,15 @@ def normalizeArray2D(table):
 # getting the current working directory
 cwd = os.getcwd()
 
-
-
+def greyFrequencies(img):
+    size1 = len(img)
+    size2 = len(img[0])
+    #print('s1=',size1,' s2=',size2)
+    rez = np.zeros((1,255))
+    for i in range (size1):
+        for j in range (size2):
+            rez [0][ img[i][j] ] += 1
+    return rez
 
 # reading of our images
 print("Donwloading images for a pathological and a normal state of a kidney parenchyma for our ultrasonography:")
@@ -100,6 +107,7 @@ auhFull = cwd + "/unCheckPatho/auh"
 auhBMP = getBMP(auhFull)
 for i in range(len(auhBMP)):
     auhBMP[i] = rgb2gray(auhBMP[i])
+
 
 # PE works but have NO sense
 '''
@@ -233,31 +241,53 @@ for i in range(len(pathoBMP)):
 print("pathology was saved sucessfull")
 '''
 
-
 ## GLCM results' saving
 # plt.imsave("tmp/tmp2.png",gray, cmap=grCoMap)
 
 
-'''
-# считывание 1го изображение для тестов
-original = mpimg.imread("pathology/14.bmp")
-#original = original[0:20,0:20,:]
-fig = plt.figure()
-#plt.subplot(211)
-#plt.imshow(original)
-#plt.title("Оригінальне зображення")
-plt.imsave("tmp/tmp1.png", original)
-rawGray = rgb2gray(original)
-gray = np.array(rawGray)
-calculation = glcm.GLCM(gray).glcm_complex_duplex()
-#grCoMap = plt.get_cmap('gray')
-ax = fig.add_subplot(111)
-# GLCM results' saving
-plt.imshow(calculation)
-#cmap=grCoMap
+## считывание 1го изображение для тестов
+#original = mpimg.imread("pathology/14.bmp")
+##original = original[0:20,0:20,:]
+#fig = plt.figure()
+##plt.subplot(211)
+##plt.imshow(original)
+##plt.title("Оригінальне зображення")
+##plt.imsave("tmp/tmp1.png", original)
+#rawGray = rgb2gray(original)
+#gray = np.array(rawGray)
+##calculation = glcm.GLCM(gray).glcm_complex_duplex()
+##grCoMap = plt.get_cmap('gray')
+#ax = fig.add_subplot(111)
+## GLCM results' saving
+##plt.imshow(calculation)
+##cmap=grCoMap
+#grFr = greyFrequencies(gray)
+##grHist = plt.hist(gray)
+##print(grHist)
+#plt.bar(np.arange(0,255,1),grFr[0], color='g', alpha=0.1)
+
+def barAverageGrayFrequency(imgAr, color='b', alpha=1.):
+    rez = np.zeros((1, 255))
+    for i in range(len(imgAr)):
+        gray = np.array(imgAr[i])
+        grFr = greyFrequencies(gray)
+        relative = np.zeros((1,255))
+        summ = np.sum(grFr[0])
+        for j in range (len(grFr[0])):
+            relative[0][j] = grFr[0][j] * 100 / summ
+
+        for j in range(len(rez[0])):
+            rez[0][j] += relative[0][j]
+    for k in range(len(rez[0])):
+        rez[0][k] /= len(imgAr[0])
+    plt.bar(np.arange(0, 255, 1), rez[0], color=color, alpha=alpha)
+
+barAverageGrayFrequency(normaBMP,'b',0.6)
+barAverageGrayFrequency(pathoBMP,'r',0.4)
+
 
 #plt.imsave("tmp/tmp2.png",gray, cmap=grCoMap)
-'''
+
 
 '''
 ax = fig.add_subplot(212)
@@ -347,4 +377,4 @@ plt.ylabel("color2")
 #plt.legend()
 '''
 
-# plt.show()
+plt.show()
