@@ -1,0 +1,5 @@
+dsh = дисхолия
+gpb = гепатит Б
+gpc = гепатит С
+vls = вильсон
+auh = autoimmune hepatitis

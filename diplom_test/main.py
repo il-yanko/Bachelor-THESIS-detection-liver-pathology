@@ -9,21 +9,21 @@ from PIL import Image
 import math
 
 #download folder BMP
-def getBMP(fullDir):
+def get_all_BMP(fullDir):
     # считаем количество изображений
     fileNumber = len(next(os.walk(fullDir))[2])
-    print(fileNumber, "pictures were found")
+    print(fileNumber, "images were found")
     imgArr = []
     for i in range(1, fileNumber + 1):
         imgArr.append(mpimg.imread(fullDir + '/' + str(i) + ".bmp"))
-    print(len(imgArr), "image was read")
-    #дописать исключения
+    print(len(imgArr), "images were downloaded")
+    # TODO: дописать исключения
     return imgArr
 #process RGB/grayscale
-def rgb2gray(rgb):
+def rgb_to_gray(rgb):
     #скалярное произведение начальных цветов с определенными теоретическими коэффициентами по системе YUV
     return np.dot(rgb[...,:3], [0.333, 0.333, 0.333]).round(3).astype(int)
-def averageRGB(img, windW, windH):
+def average_RGB(img, windW, windH):
     #укрупним области
     w = len(img[0])
     h = len(img)
@@ -46,7 +46,7 @@ def averageRGB(img, windW, windH):
                     ed[i+a][j+b][1] = G
                     ed[i+a][j+b][2] = B
     return ed
-def averageGray(img, windW, windH):
+def average_gray(img, windW, windH):
     #укрупним области
     w = len(img[0])
     h = len(img)
@@ -64,7 +64,7 @@ def averageGray(img, windW, windH):
                     ed[i+a][j+b] = G
     return ed
 #normalization to the summ
-def normalizeArray2D(table):
+def normalize_array_2D(table):
     # to divide each cell by the sum of all cells
     size1 = len(table)
     size2 = len(table[0])
@@ -80,33 +80,36 @@ def normalizeArray2D(table):
 # getting the current working directory
 cwd = os.getcwd()
 
-def greyFrequencies(img):
-    size1 = len(img)
-    size2 = len(img[0])
-    #print('s1=',size1,' s2=',size2)
-    rez = np.zeros((1,255))
-    for i in range (size1):
-        for j in range (size2):
-            rez [0][ img[i][j] ] += 1
-    return rez
+
 
 # reading of our images
 print("Donwloading images for a pathological and a normal state of a kidney parenchyma for our ultrasonography:")
-pathoFull = cwd + "/pathology"
-pathoBMP = getBMP(pathoFull)
-for i in range (len(pathoBMP)):
-    pathoBMP[i] = rgb2gray(pathoBMP[i])
 
-normaFull = cwd + "/norma"
-normaBMP = getBMP(normaFull)
-for i in range (len(normaBMP)):
-    normaBMP[i] = rgb2gray(normaBMP[i])
+def get_all_img_make_gray(cwd, folderName):
+    path = cwd + "/" + folderName
+    print("\nPath = ", path)
+    imgArray = get_all_BMP(path)
+    for i in range(len(imgArray)):
+        imgArray[i] = rgb_to_gray(imgArray[i])
+    return imgArray
+#patho = get_all_img_make_gray(cwd, "pathology")
+norma = get_all_img_make_gray(cwd, "norma")
 
-# auh = autoimmune hepatitis
-auhFull = cwd + "/unCheckPatho/auh"
-auhBMP = getBMP(auhFull)
-for i in range(len(auhBMP)):
-    auhBMP[i] = rgb2gray(auhBMP[i])
+pathoNames = ["auh","dsh","gpb","gpc","vls"]
+
+# TODO: сделать какую-то структуру (может, деку или что-то такое)
+auh = get_all_img_make_gray(cwd, "data/" + pathoNames[0])
+dsh = get_all_img_make_gray(cwd, "data/" + pathoNames[1])
+gpb = get_all_img_make_gray(cwd, "data/" + pathoNames[2])
+gpc = get_all_img_make_gray(cwd, "data/" + pathoNames[3])
+vls = get_all_img_make_gray(cwd, "data/" + pathoNames[4])
+
+array = []
+array.append(auh)
+array.append(dsh)
+array.append(gpb)
+array.append(gpc)
+array.append(vls)
 
 
 # PE works but have NO sense
@@ -266,7 +269,16 @@ print("pathology was saved sucessfull")
 ##print(grHist)
 #plt.bar(np.arange(0,255,1),grFr[0], color='g', alpha=0.1)
 
-def barAverageGrayFrequency(imgAr, color='b', alpha=1.):
+def greyFrequencies(img):
+    size1 = len(img)
+    size2 = len(img[0])
+    #print('s1=',size1,' s2=',size2)
+    rez = np.zeros((1,255))
+    for i in range (size1):
+        for j in range (size2):
+            rez [0][ img[i][j] ] += 1
+    return rez
+def histogram_average_gray_frequency(imgAr, color='b', alpha=1.):
     rez = np.zeros((1, 255))
     for i in range(len(imgAr)):
         gray = np.array(imgAr[i])
@@ -282,8 +294,17 @@ def barAverageGrayFrequency(imgAr, color='b', alpha=1.):
         rez[0][k] /= len(imgAr[0])
     plt.bar(np.arange(0, 255, 1), rez[0], color=color, alpha=alpha)
 
-barAverageGrayFrequency(normaBMP,'b',0.6)
-barAverageGrayFrequency(pathoBMP,'r',0.4)
+'''
+plt.subplot(511)
+histogram_average_gray_frequency(norma, 'b', 0.6)
+histogram_average_gray_frequency(patho, 'r', 0.4)
+'''
+number = len(pathoNames)
+for i in range (number):
+    plt.subplot(number,1,i+1)
+    histogram_average_gray_frequency(norma, 'b', 0.6)
+    histogram_average_gray_frequency(array[i], 'r', 0.4)
+    plt.title(pathoNames[i] + ' + norma')
 
 
 #plt.imsave("tmp/tmp2.png",gray, cmap=grCoMap)
