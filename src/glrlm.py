@@ -9,7 +9,7 @@ class GLRLM:
     def __init__(self, image):
         self.image = image
         self.h, self.w = np.shape(image)
-        self.gray_level = 4
+        self.gray_level = 255
         self.glrlm = None
 
 
@@ -18,6 +18,8 @@ class GLRLM:
 
         glrlm = np.zeros([self.gray_level, self.w], dtype=int)
 
+        N_z = 0
+
         for i in range(self.h):
             count = 0
             for j in range(self.w):
@@ -25,53 +27,145 @@ class GLRLM:
                     count += 1
                 else:
                     glrlm[self.image[i][j]][count] += 1
+                    N_z += 1
                     count = 0
-        return glrlm
+        return glrlm, N_z
 
-    def LGRE(self, glrlm):
+class GLRLM_Features():
+
+    @staticmethod
+    def SRE(matrix, N_z):
+        """
+        Short Run Emphasis
+
+        N_z - number of runs in the image along angle
+        """
+        if matrix is None:
+            raise AttributeError("No matrix")
+
         res = 0
-        s = glrlm.shape[1]
 
-        for i in range(glrlm.shape[0]):
-            for j in range(glrlm.shape[1]):
-                res += (glrlm[i][j] / s) / (i * i) if i != 0 else 0
+        for i in range(matrix.shape[0]):
+            for j in range(matrix.shape[1]):
+                res += matrix[i][j] * j * j
+
+        res /= N_z
 
         return res
 
-    def HGRE(self, glrlm):
+    @staticmethod
+    def LRE(matrix, N_z):
+        """Long Run Emphasis"""
+
+        if matrix is None:
+            raise AttributeError("No matrix")
+
         res = 0
-        s = glrlm.shape[1]
+        N_g, N_r = matrix.shape[0], matrix.shape[1]
 
-        for i in range(glrlm.shape[0]):
-            for j in range(glrlm.shape[1]):
-                res += (glrlm[i][j] * (i * i)) / s
+        for i in range(N_g):
+            for j in range(N_r):
+                res += matrix[i][j] / (j + 1 ** 2)
 
-        return res
-
-    def GLNU(self, glrlm):
-        # res = 0
-        s = glrlm.shape[1]
-
-        res = sum([sum([g**2 for g in line]) for line in glrlm]) / s
-        # for i in range(glrlm.shape[0]):
-        #     for j in range(glrlm.shape[1]):
-                # res += glrlm[i][j]**2
+        res /= N_z
 
         return res
 
 
-image = np.asarray([
-    [0, 1, 2, 3],
-    [0, 2, 3, 3],
-    [2, 1, 1, 1],
-    [3, 0, 3, 0]
-])
 
-gl = GLRLM(image)
+    @staticmethod
+    def LGRE(matrix, N_z):
+        """Low Gray Level Run Rmphasis"""
+        if matrix is None:
+            raise AttributeError("No matrix")
 
-print(gl.glrlm_0())
-res = gl.glrlm_0()
+        res = 0
 
-print("LGRE: ", gl.LGRE(res))
-print("HGRE: ", gl.HGRE(res))
-print("GLNU: ", gl.GLNU(res))
+        for i in range(matrix.shape[0]):
+            for j in range(matrix.shape[1]):
+                res += (matrix[i][j]) / ((i + 1) ** 2)
+        res /= N_z
+
+        return res
+
+    @staticmethod
+    def HGRE(matrix, N_z):
+        """High Rray Level Run Emphasis"""
+        if matrix is None:
+            raise AttributeError("No matrix")
+
+        res = 0
+
+        for i in range(matrix.shape[0]):
+            for j in range(matrix.shape[1]):
+                res += (matrix[i][j] * (i * i))
+
+        res /= N_z
+
+        return res
+
+    @staticmethod
+    def GLNU(matrix, N_z):
+        """Gray Level Non-uniformity"""
+        if matrix is None:
+            raise AttributeError("No matrix")
+
+        res = 0
+
+        for i in range(matrix.shape[0]):
+            for j in range(matrix.shape[1]):
+                res += matrix[i][j] ** 2
+        res /= N_z
+
+        return res
+
+from img_reader import IMGReader
+import pandas as pd
+
+PROJECT_PWD = "/Volumes/Storage/goinfre/ikachko/algorithm-detects-liver-pathology"
+NORMA_DIR = PROJECT_PWD + "/norma_png/"
+PATHOLOGY_DIR = PROJECT_PWD + "/pathology_png/"
+
+norma_imgs_names, norma_imgs = IMGReader.read_directory(NORMA_DIR)
+pathology_img_names, pathology_imgs = IMGReader.read_directory(PATHOLOGY_DIR)
+
+
+features = ['SRE', 'LRE', 'LGRE', 'HGRE', 'GLNU', 'isPatho']
+
+data = []
+
+for img_name, img in zip(norma_imgs_names, norma_imgs):
+    print(img_name)
+    g = GLRLM(img)
+
+    m, N_z = g.glrlm_0()
+
+    d = {
+        # 'SRE': GLRLM_Features().SRE(m, N_z),
+        # 'LRE': GLRLM_Features().LRE(m, N_z),
+        'LGRE': GLRLM_Features().LGRE(m, N_z),
+        'HGRE': GLRLM_Features().HGRE(m, N_z),
+        'GLNU': GLRLM_Features().GLNU(m, N_z),
+        'isPatho': 0
+    }
+    data.append(d)
+
+for img in pathology_imgs:
+    g = GLRLM(img)
+
+    m, N_z = g.glrlm_0()
+
+    d = {
+        # 'SRE': GLRLM_Features().SRE(m, N_z),
+        # 'LRE': GLRLM_Features().LRE(m, N_z),
+        'LGRE': GLRLM_Features().LGRE(m, N_z),
+        'HGRE': GLRLM_Features().HGRE(m, N_z),
+        'GLNU': GLRLM_Features().GLNU(m, N_z),
+        'isPatho': 1
+    }
+    data.append(d)
+
+df = pd.DataFrame(data).sample(frac=1)
+df.to_csv('./datasets/glrlm_0.csv')
+print(df.head())
+
