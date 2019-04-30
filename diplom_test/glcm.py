@@ -1,13 +1,15 @@
 import numpy as np
+import matplotlib
 
 
 class GLCM:
     """GLCM = Gray-Level Co-Occurrence Matrix"""
 
     def __init__(self, gray):
-        self.grey = gray
+        self.gray = gray
         self.h, self.w = np.shape(gray)
         self.size = 255
+        self.saved = gray
 
     def glcm_0(self):
         """horizontal co-occurrence"""
@@ -15,13 +17,13 @@ class GLCM:
         enabled = np.zeros([self.size, self.size])
         for i in range(self.h):
             for j in range(self.w - 1):
-                left = self.grey[i][j]
-                right = self.grey[i][j + 1]
+                left = self.gray[i][j]
+                right = self.gray[i][j + 1]
                 if enabled[left - 1][right - 1] != 1:
                     for a in range(self.h):
                         for b in range(self.w - 1):
-                            newLeft = self.grey[a][b]
-                            newRight = self.grey[a][b + 1]
+                            newLeft = self.gray[a][b]
+                            newRight = self.gray[a][b + 1]
                             if newLeft == left and newRight == right:
                                 glcm[left - 1][right - 1] += 1
                     enabled[left - 1][right - 1] = 1
@@ -33,13 +35,13 @@ class GLCM:
         enabled = np.zeros([self.size, self.size])
         for i in range(self.h - 1):
             for j in range(self.w - 1):
-                leftLow = self.grey[i + 1][j]
-                rightUp = self.grey[i][j + 1]
+                leftLow = self.gray[i + 1][j]
+                rightUp = self.gray[i][j + 1]
                 if enabled[leftLow - 1][rightUp - 1] != 1:
                     for a in range(self.h - 1):
                         for b in range(self.w - 1):
-                            newLeftLow = self.grey[a + 1][b]
-                            newRightUp = self.grey[a][b + 1]
+                            newLeftLow = self.gray[a + 1][b]
+                            newRightUp = self.gray[a][b + 1]
                             if newLeftLow == leftLow and newRightUp == rightUp:
                                 glcm[leftLow - 1][rightUp - 1] += 1
                     enabled[leftLow - 1][rightUp - 1] = 1
@@ -51,13 +53,13 @@ class GLCM:
         enabled = np.zeros([self.size, self.size])
         for i in range(self.h - 1):
             for j in range(self.w):
-                up = self.grey[i][j]
-                low = self.grey[i + 1][j]
+                up = self.gray[i][j]
+                low = self.gray[i + 1][j]
                 if enabled[up - 1][low - 1] != 1:
                     for a in range(self.h - 1):
                         for b in range(self.w):
-                            newLow = self.grey[a + 1][b]
-                            newUp = self.grey[a][b]
+                            newLow = self.gray[a + 1][b]
+                            newUp = self.gray[a][b]
                             if (newLow == low and newUp == up):
                                 glcm[up - 1][low - 1] += 1
                     enabled[up - 1][low - 1] = 1
@@ -69,13 +71,13 @@ class GLCM:
         enabled = np.zeros([self.size, self.size])
         for i in range(self.h - 1):
             for j in range(self.w - 1):
-                leftUp = self.grey[i][j]
-                rightLow = self.grey[i + 1][j + 1]
+                leftUp = self.gray[i][j]
+                rightLow = self.gray[i + 1][j + 1]
                 if enabled[leftUp - 1][rightLow - 1] != 1:
                     for a in range(self.h - 1):
                         for b in range(self.w - 1):
-                            newLeftUp = self.grey[a][b]
-                            newRightLow = self.grey[a + 1][b + 1]
+                            newLeftUp = self.gray[a][b]
+                            newRightLow = self.gray[a + 1][b + 1]
                             if newLeftUp == leftUp and newRightLow == rightLow:
                                 glcm[leftUp - 1][rightLow - 1] += 1
                     enabled[leftUp - 1][rightLow - 1] = 1
@@ -87,7 +89,8 @@ class GLCM:
 
     def glcm_gen_duplex(self, method):
         """to equalize pairs A-B and B-A and to get the result"""
-        glcm = method()  # it should obligatory be a glcm-like kind of the method
+        # this function is required for creation of Color-Color symmetrical GLCM
+        glcm = method()  # it should obligatory be a GLCM-like kind of the method
         for i in range(len(glcm)):
             for j in range(i + 1):
                 if i == j:
@@ -104,3 +107,68 @@ class GLCM:
                + self.glcm_gen_duplex(self.glcm_45) \
                + self.glcm_gen_duplex(self.glcm_90) \
                + self.glcm_gen_duplex(self.glcm_135)
+
+
+# garbage processing
+# processing and saving of GLCM (.csv)
+'''
+for i in range(len(normaBMP)):
+    curIm = normaBMP[i]
+    calculation = glcm.GLCM(curIm).glcm_complex_duplex()
+    number = i + 1
+    print(number)
+    path = "glcm/n/n" + str(number) + ".csv"
+    np.savetxt(path, calculation, fmt="%d", delimiter=",")
+for i in range(len(pathoBMP)):
+    curIm = pathoBMP[i]
+    calculation = glcm.GLCM(curIm).glcm_complex_duplex()
+    number = i + 1
+    print(number)
+    path = "glcm/p/p" + str(number) + ".csv"
+    np.savetxt(path, calculation, fmt="%d", delimiter=",")
+for i in range(len(auhBMP)):
+    curIm = auhBMP[i]
+    calculation = glcm.GLCM(curIm).glcm_complex_duplex()
+    number = i + 1
+    print(number)
+    path = "glcm/auh/auh" + str(number) + ".csv"
+    np.savetxt(path, calculation, fmt="%d", delimiter=",")
+'''
+# 5x5 images
+'''
+columns = 5
+rows    = math.ceil(len(normaBMP) / columns)
+for i in range(len(normaBMP)):
+    curIm = normaBMP[i]
+    #curIm = curIm[0:3,0:3]
+    #plt.imshow(curIm)
+    curRow, curCol = 0, 0
+    calculation = glcm.GLCM(curIm).glcm_complex_duplex()
+    number = i+1
+    print(rows,columns,number)
+    fig.add_subplot(rows,columns,number)
+    plt.imshow(calculation)
+    plt.tight_layout()
+plt.savefig('tmp/norma.png')
+'''
+# save all 50 GLCMs as temporary
+'''
+for i in range(len(normaBMP)):
+    curIm = normaBMP[i]
+    calculation = glcm.GLCM(curIm).glcm_complex_duplex()
+    number = i+1
+    print(number)
+    plt.imshow(calculation)
+    path = "glcm/n/n" + str(number) + ".png"
+    plt.imsave(path, calculation, cmap="inferno")
+print("norma was saved sucessfull")
+for i in range(len(pathoBMP)):
+    curIm = pathoBMP[i]
+    calculation = glcm.GLCM(curIm).glcm_complex_duplex()
+    number = i+1
+    print(number)
+    plt.imshow(calculation)
+    path = "glcm/p/p" + str(number) + ".png"
+    plt.imsave(path, calculation, cmap="inferno")
+print("pathology was saved sucessfull")
+'''

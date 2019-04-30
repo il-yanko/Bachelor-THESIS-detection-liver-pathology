@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+import matplotlib.patches as mpatches
 import os, os.path
 import glcm
 import pe
@@ -80,11 +81,7 @@ def normalize_array_2D(table):
 # getting the current working directory
 cwd = os.getcwd()
 
-
-
-# reading of our images
 print("Donwloading images for a pathological and a normal state of a kidney parenchyma for our ultrasonography:")
-
 def get_all_img_make_gray(cwd, folderName):
     path = cwd + "/" + folderName
     print("\nPath = ", path)
@@ -96,156 +93,18 @@ def get_all_img_make_gray(cwd, folderName):
 norma = get_all_img_make_gray(cwd, "norma")
 
 pathoNames = ["auh","dsh","gpb","gpc","vls"]
-
 # TODO: сделать какую-то структуру (может, деку или что-то такое)
 auh = get_all_img_make_gray(cwd, "data/" + pathoNames[0])
 dsh = get_all_img_make_gray(cwd, "data/" + pathoNames[1])
 gpb = get_all_img_make_gray(cwd, "data/" + pathoNames[2])
 gpc = get_all_img_make_gray(cwd, "data/" + pathoNames[3])
 vls = get_all_img_make_gray(cwd, "data/" + pathoNames[4])
-
 array = []
 array.append(auh)
 array.append(dsh)
 array.append(gpb)
 array.append(gpc)
 array.append(vls)
-
-
-# PE works but have NO sense
-'''
-# PERMUTATION ENTROPY and ordinal patterns calculations and processing
-patternNumber = 5
-#min, max, increasing, decreasing, stability
-patternAXIS1 = 1
-patternAXIS2 = 4
-AXIS1name = "МАКСИМУМ, %"
-AXIS2name = "СТАБІЛЬНІСТЬ, %"
-
-print('\nPathological specimens')
-pathoPEpatterns = np.zeros((1, patternNumber))
-for i in range(len(pathoBMP)):
-    tmp = pe.pe(pathoBMP[i])
-    tmp.PErawAnalysis(10)
-    # это чтобы добавить 1 (!!!) отметку в легенду, мб исправить потом
-    # НАДО перейти к scatter (!!!)
-    plt.plot(tmp.rez[0][patternAXIS1],
-             tmp.rez[0][patternAXIS2],
-             'ro')
-    #label='pathological SAMPLES'
-    for j in range(patternNumber):
-        pathoPEpatterns[0][j] += tmp.rez[0][j]
-
-for k in range(patternNumber):
-    pathoPEpatterns[0][k] /= len(pathoBMP)
-plt.plot(pathoPEpatterns[0][patternAXIS1],
-         pathoPEpatterns[0][patternAXIS2],
-         'r*', label='pathological AVERAGE',
-         markersize=30)
-print(pathoPEpatterns)
-
-print('Normal specimens')
-normaPEpatterns = np.zeros((1, patternNumber))
-for i in range(len(normaBMP)):
-    tmp = pe.pe(normaBMP[i])
-    tmp.PErawAnalysis(10)
-    plt.plot(tmp.rez[0][patternAXIS1],
-             tmp.rez[0][patternAXIS2],
-             'b^')
-    for j in range(patternNumber):
-        normaPEpatterns[0][j] += tmp.rez[0][j]
-
-for k in range(patternNumber):
-    normaPEpatterns[0][k] /= len(normaBMP)
-plt.plot(normaPEpatterns[0][patternAXIS1],
-         normaPEpatterns[0][patternAXIS2],
-         'b*', label='normal AVERAGE',
-         markersize=30)
-print(normaPEpatterns)
-
-perc = np.zeros((1, patternNumber))
-for i in range(patternNumber):
-    dif = abs(normaPEpatterns[0][i] - pathoPEpatterns[0][i])
-    perc[0][i] = (dif / max(normaPEpatterns[0][i], pathoPEpatterns[0][i])) * 100
-print('Normalized difference in percents:')
-print(perc)
-
-plt.xlabel(AXIS1name)
-plt.ylabel(AXIS2name)
-plt.legend()
-plt.savefig('ordinal_patterns.png')
-'''
-
-fig = plt.figure(figsize=(10, 10), dpi=80, facecolor='w', edgecolor='k')
-# grCoMap = plt.get_cmap('gray')
-
-# підрахунок та збереження GLCM-таблиць (.csv)
-'''
-for i in range(len(normaBMP)):
-    curIm = normaBMP[i]
-    calculation = glcm.GLCM(curIm).glcm_complex_duplex()
-    number = i + 1
-    print(number)
-    path = "glcm/n/n" + str(number) + ".csv"
-    np.savetxt(path, calculation, fmt="%d", delimiter=",")
-for i in range(len(pathoBMP)):
-    curIm = pathoBMP[i]
-    calculation = glcm.GLCM(curIm).glcm_complex_duplex()
-    number = i + 1
-    print(number)
-    path = "glcm/p/p" + str(number) + ".csv"
-    np.savetxt(path, calculation, fmt="%d", delimiter=",")
-for i in range(len(auhBMP)):
-    curIm = auhBMP[i]
-    calculation = glcm.GLCM(curIm).glcm_complex_duplex()
-    number = i + 1
-    print(number)
-    path = "glcm/auh/auh" + str(number) + ".csv"
-    np.savetxt(path, calculation, fmt="%d", delimiter=",")
-'''
-
-# 5x5 картинок
-'''
-columns = 5
-rows    = math.ceil(len(normaBMP) / columns)
-for i in range(len(normaBMP)):
-    curIm = normaBMP[i]
-    #curIm = curIm[0:3,0:3]
-    #plt.imshow(curIm)
-    curRow, curCol = 0, 0
-    calculation = glcm.GLCM(curIm).glcm_complex_duplex()
-    number = i+1
-    print(rows,columns,number)
-    fig.add_subplot(rows,columns,number)
-    plt.imshow(calculation)
-    plt.tight_layout()
-plt.savefig('tmp/norma.png')
-'''
-
-# сохран всех 50 картинок глцм в папку временных
-'''
-for i in range(len(normaBMP)):
-    curIm = normaBMP[i]
-    calculation = glcm.GLCM(curIm).glcm_complex_duplex()
-    number = i+1
-    print(number)
-    plt.imshow(calculation)
-    path = "glcm/n/n" + str(number) + ".png"
-    plt.imsave(path, calculation, cmap="inferno")
-print("norma was saved sucessfull")
-for i in range(len(pathoBMP)):
-    curIm = pathoBMP[i]
-    calculation = glcm.GLCM(curIm).glcm_complex_duplex()
-    number = i+1
-    print(number)
-    plt.imshow(calculation)
-    path = "glcm/p/p" + str(number) + ".png"
-    plt.imsave(path, calculation, cmap="inferno")
-print("pathology was saved sucessfull")
-'''
-
-## GLCM results' saving
-# plt.imsave("tmp/tmp2.png",gray, cmap=grCoMap)
 
 
 ## считывание 1го изображение для тестов
@@ -269,6 +128,9 @@ print("pathology was saved sucessfull")
 ##print(grHist)
 #plt.bar(np.arange(0,255,1),grFr[0], color='g', alpha=0.1)
 
+
+# build histograms for different diseases comparing with norma
+'''
 def greyFrequencies(img):
     size1 = len(img)
     size2 = len(img[0])
@@ -278,7 +140,7 @@ def greyFrequencies(img):
         for j in range (size2):
             rez [0][ img[i][j] ] += 1
     return rez
-def histogram_average_gray_frequency(imgAr, color='b', alpha=1.):
+def histogram_average_gray_frequency(imgAr,name,color='b',alpha=1.):
     rez = np.zeros((1, 255))
     for i in range(len(imgAr)):
         gray = np.array(imgAr[i])
@@ -292,52 +154,17 @@ def histogram_average_gray_frequency(imgAr, color='b', alpha=1.):
             rez[0][j] += relative[0][j]
     for k in range(len(rez[0])):
         rez[0][k] /= len(imgAr[0])
-    plt.bar(np.arange(0, 255, 1), rez[0], color=color, alpha=alpha)
-
-'''
-plt.subplot(511)
-histogram_average_gray_frequency(norma, 'b', 0.6)
-histogram_average_gray_frequency(patho, 'r', 0.4)
-'''
+    plt.bar(np.arange(0,255,1),rez[0],color=color,alpha=alpha,label=name)
 number = len(pathoNames)
 for i in range (number):
     plt.subplot(number,1,i+1)
-    histogram_average_gray_frequency(norma, 'b', 0.6)
-    histogram_average_gray_frequency(array[i], 'r', 0.4)
+    histogram_average_gray_frequency(norma,'norma','b',0.7)
+    histogram_average_gray_frequency(array[i],pathoNames[i],'r',0.9)
     plt.title(pathoNames[i] + ' + norma')
-
-
-#plt.imsave("tmp/tmp2.png",gray, cmap=grCoMap)
-
-
-'''
-ax = fig.add_subplot(212)
-plt.imshow(gray, cmap=grCoMap)
-plt.title("Original")
-'''
-
-# this code computes and plots gradients of the image
-'''
-dif = grds.gradient(gray)
-plt.subplot(323)
-dif.computeHorizontal()
-plt.imshow(dif.getHorizontal(),cmap="inferno")
-plt.title("Horizontal")
-plt.subplot(324)
-dif.computeVertical()
-plt.imshow(dif.getVertical(),cmap="inferno")
-plt.title("Vertical")
-plt.subplot(325)
-dif.computeDiagonal135()
-plt.imshow(dif.getDiagonal135(),cmap="inferno")
-plt.title("Diagonal135")
-plt.subplot(326)
-dif.computeDiagonal45()
-plt.imshow(dif.getDiagonal45(),cmap="inferno")
-plt.title("Diagonal45")
-fig.tight_layout()
-## save
-#fig.savefig("tmp/p5.pdf")
+    plt.ylabel('% samples') #, fontsize=18
+    plt.xlabel('color')
+    plt.xlim(0,255)
+    plt.legend(loc='best')
 '''
 
 # attempt to plot the red-blue mask on the gray image
@@ -390,12 +217,4 @@ plt.imshow(im2arr)
 plt.title("Зображення, покрите маскою на основі GLCM")
 '''
 
-# labels for GLCM
-'''
-plt.title("Color-Color symmetrical GLCM")
-plt.xlabel("color1")
-plt.ylabel("color2")
-#plt.legend()
-'''
-
-plt.show()
+#plt.show()

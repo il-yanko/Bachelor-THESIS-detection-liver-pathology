@@ -52,3 +52,27 @@ A = np.around(np.random.random((5,3)),decimals=1)
 B = gradient(A)
 B.compute()
 """
+
+# this code computes and plots gradients of the image
+'''
+dif = grds.gradient(gray)
+plt.subplot(323)
+dif.computeHorizontal()
+plt.imshow(dif.getHorizontal(),cmap="inferno")
+plt.title("Horizontal")
+plt.subplot(324)
+dif.computeVertical()
+plt.imshow(dif.getVertical(),cmap="inferno")
+plt.title("Vertical")
+plt.subplot(325)
+dif.computeDiagonal135()
+plt.imshow(dif.getDiagonal135(),cmap="inferno")
+plt.title("Diagonal135")
+plt.subplot(326)
+dif.computeDiagonal45()
+plt.imshow(dif.getDiagonal45(),cmap="inferno")
+plt.title("Diagonal45")
+fig.tight_layout()
+## save
+#fig.savefig("tmp/p5.pdf")
+'''
