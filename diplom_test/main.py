@@ -7,20 +7,19 @@ import glcm
 import pe
 import gradients as grds
 from PIL import Image
-import math
+import scipy.stats as stats
 
-#download folder BMP
+# download folder BMP
 def get_all_BMP(fullDir):
-    # считаем количество изображений
+    # to calculate number of files in the folder
     fileNumber = len(next(os.walk(fullDir))[2])
     print(fileNumber, "images were found")
     imgArr = []
     for i in range(1, fileNumber + 1):
         imgArr.append(mpimg.imread(fullDir + '/' + str(i) + ".bmp"))
     print(len(imgArr), "images were downloaded")
-    # TODO: дописать исключения
     return imgArr
-#process RGB/grayscale
+# process RGB/grayscale
 def rgb_to_gray(rgb):
     #скалярное произведение начальных цветов с определенными теоретическими коэффициентами по системе YUV
     return np.dot(rgb[...,:3], [0.333, 0.333, 0.333]).round(3).astype(int)
@@ -64,7 +63,7 @@ def average_gray(img, windW, windH):
                 for b in range (windW):
                     ed[i+a][j+b] = G
     return ed
-#normalization to the summ
+# normalization to the summ
 def normalize_array_2D(table):
     # to divide each cell by the sum of all cells
     size1 = len(table)
@@ -78,6 +77,24 @@ def normalize_array_2D(table):
         for j in range(size2):
             rez[i][j] = table[i][j]/sum
     return rez
+# compute descriptive statistics
+def calculate_first_order_statistic_2D(data):
+    agg_measures = {
+        'avg': np.mean(data),
+        'std': np.std(data),
+        'var': np.var(data),
+        'med': np.median(data),
+        '10p': np.percentile(data, 10),
+        '25p': np.percentile(data, 25),
+        '50p': np.percentile(data, 50),
+        '75p': np.percentile(data, 75),
+        '90p': np.percentile(data, 90),
+        'iqr': np.percentile(data, 75) - np.percentile(data, 25),
+        'skw': stats.skew(data.flatten()),
+        'kur': stats.kurtosis(data.flatten())
+    }
+    return agg_measures
+param = ['avg','std','var','med','10p','25p','50p','75p','90p','iqr','skw','kur']
 # getting the current working directory
 cwd = os.getcwd()
 
@@ -89,11 +106,13 @@ def get_all_img_make_gray(cwd, folderName):
     for i in range(len(imgArray)):
         imgArray[i] = rgb_to_gray(imgArray[i])
     return imgArray
+pathoNames = ["auh","dsh","gpb","gpc","vls"]
+
+
+
+# TODO: make some data structure for all that
 #patho = get_all_img_make_gray(cwd, "pathology")
 norma = get_all_img_make_gray(cwd, "norma")
-
-pathoNames = ["auh","dsh","gpb","gpc","vls"]
-# TODO: сделать какую-то структуру (может, деку или что-то такое)
 auh = get_all_img_make_gray(cwd, "data/" + pathoNames[0])
 dsh = get_all_img_make_gray(cwd, "data/" + pathoNames[1])
 gpb = get_all_img_make_gray(cwd, "data/" + pathoNames[2])
@@ -107,28 +126,60 @@ array.append(gpc)
 array.append(vls)
 
 
-## считывание 1го изображение для тестов
-#original = mpimg.imread("pathology/14.bmp")
-##original = original[0:20,0:20,:]
-#fig = plt.figure()
-##plt.subplot(211)
-##plt.imshow(original)
-##plt.title("Оригінальне зображення")
-##plt.imsave("tmp/tmp1.png", original)
-#rawGray = rgb2gray(original)
-#gray = np.array(rawGray)
-##calculation = glcm.GLCM(gray).glcm_complex_duplex()
-##grCoMap = plt.get_cmap('gray')
-#ax = fig.add_subplot(111)
+# read 1 image as a test
+'''
+original = mpimg.imread("pathology/14.bmp")
+original = original[0:5,0:5,:]
+rawGray = rgb_to_gray(original)
+gray = np.array(rawGray)
+#plt.imshow(original)
+#plt.imsave("tmp/tmp1.png", original)
+#calculation = glcm.GLCM(gray).glcm_complex_duplex()
 ## GLCM results' saving
-##plt.imshow(calculation)
-##cmap=grCoMap
-#grFr = greyFrequencies(gray)
-##grHist = plt.hist(gray)
-##print(grHist)
-#plt.bar(np.arange(0,255,1),grFr[0], color='g', alpha=0.1)
+#plt.imshow(calculation)
+'''
 
 
+
+
+
+
+
+
+
+
+
+
+numberParam = len(param)
+numberPatho = len(pathoNames)
+# build scatters for different 1st order stats of diseases comparing with norma
+'''
+def pseudo_scatter(fig,imgAr,name,color='b',alpha=1.,marker="."):
+    global param
+    for i in range(len(imgAr)-1):
+        gray = np.array(imgAr[i])
+        stat = calculate_first_order_statistic_2D(gray)
+        for j in range(numberParam):
+            ax = fig.add_subplot(numberParam,2,j+1)
+            ax.set_title(param[j])
+            ax.scatter(stat[param[j]],stat[param[j]],color=color,
+                       alpha=alpha,marker=marker)
+    gray = np.array(imgAr[len(imgAr)-1])
+    stat = calculate_first_order_statistic_2D(gray)
+    for j in range(numberParam):
+        ax = fig.add_subplot(numberParam, 2, j + 1)
+        ax.set_title(param[j])
+        ax.scatter(stat[param[numberParam-1]], stat[param[numberParam-1]], color=color,
+               alpha=alpha, label=name, marker=marker)
+        ax.legend(loc='best')
+for i in range (numberPatho):
+    data = array[i]
+    fig = plt.figure(num=pathoNames[i]+' + norma',figsize=(20, 10))
+    pseudo_scatter(fig, norma,'norma','b',0.6,"v")
+    pseudo_scatter(fig, array[i],pathoNames[i],'r',0.6,"^")
+    fig.tight_layout()
+plt.show()
+'''
 # build histograms for different diseases comparing with norma
 '''
 def greyFrequencies(img):
@@ -166,7 +217,6 @@ for i in range (number):
     plt.xlim(0,255)
     plt.legend(loc='best')
 '''
-
 # attempt to plot the red-blue mask on the gray image
 '''
 #img = Image.fromarray(grayAsRGB.astype(np.uint8))
@@ -216,5 +266,4 @@ plt.subplot(313)
 plt.imshow(im2arr)
 plt.title("Зображення, покрите маскою на основі GLCM")
 '''
-
 #plt.show()
