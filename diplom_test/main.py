@@ -1,28 +1,18 @@
+# outer dependencies:
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import matplotlib.patches as mpatches
-import os, os.path
-import glcm
-import pe
-import gradients as grds
-from PIL import Image
+import os.path
 import scipy.stats as stats
 
-# download folder BMP
-def get_all_BMP(fullDir):
-    # to calculate number of files in the folder
-    fileNumber = len(next(os.walk(fullDir))[2])
-    print(fileNumber, "images were found")
-    imgArr = []
-    for i in range(1, fileNumber + 1):
-        imgArr.append(mpimg.imread(fullDir + '/' + str(i) + ".bmp"))
-    print(len(imgArr), "images were downloaded")
-    return imgArr
-# process RGB/grayscale
-def rgb_to_gray(rgb):
-    #скалярное произведение начальных цветов с определенными теоретическими коэффициентами по системе YUV
-    return np.dot(rgb[...,:3], [0.333, 0.333, 0.333]).round(3).astype(int)
+# inner dependencies:
+from glcm import GLCM
+from pe import PE
+from img_reader import IMGReader
+import gradients as grds
+
+
 def average_RGB(img, windW, windH):
     #укрупним области
     w = len(img[0])
@@ -95,35 +85,27 @@ def calculate_first_order_statistic_2D(data):
     }
     return agg_measures
 param = ['avg','std','var','med','10p','25p','50p','75p','90p','iqr','skw','kur']
+
+#print("Donwloading images for a pathological and a normal state of a kidney parenchyma for our ultrasonography:")
+pathoNames = ["auh","dsh","gpb","gpc","vls"]
+
 # getting the current working directory
 cwd = os.getcwd()
 
-print("Donwloading images for a pathological and a normal state of a kidney parenchyma for our ultrasonography:")
-def get_all_img_make_gray(cwd, folderName):
-    path = cwd + "/" + folderName
-    print("\nPath = ", path)
-    imgArray = get_all_BMP(path)
-    for i in range(len(imgArray)):
-        imgArray[i] = rgb_to_gray(imgArray[i])
-    return imgArray
-pathoNames = ["auh","dsh","gpb","gpc","vls"]
-
-
-
-# TODO: make some data structure for all that
-#patho = get_all_img_make_gray(cwd, "pathology")
-norma = get_all_img_make_gray(cwd, "norma")
-auh = get_all_img_make_gray(cwd, "data/" + pathoNames[0])
-dsh = get_all_img_make_gray(cwd, "data/" + pathoNames[1])
-gpb = get_all_img_make_gray(cwd, "data/" + pathoNames[2])
-gpc = get_all_img_make_gray(cwd, "data/" + pathoNames[3])
-vls = get_all_img_make_gray(cwd, "data/" + pathoNames[4])
+norma = IMGReader.read_directory(cwd + "/data/general/norma/")
+patho = IMGReader.read_directory(cwd + "/data/general/ne-norma/")
+auh = IMGReader.read_directory(cwd + "/data/" + pathoNames[0] + "/")
+dsh = IMGReader.read_directory(cwd + "/data/" + pathoNames[1] + "/")
+gpb = IMGReader.read_directory(cwd + "/data/" + pathoNames[2] + "/")
+gpc = IMGReader.read_directory(cwd + "/data/" + pathoNames[3] + "/")
+vls = IMGReader.read_directory(cwd + "/data/" + pathoNames[4] + "/")
 array = []
 array.append(auh)
 array.append(dsh)
 array.append(gpb)
 array.append(gpc)
 array.append(vls)
+# TODO: make some data structure for all that
 
 
 # read 1 image as a test
@@ -139,16 +121,27 @@ gray = np.array(rawGray)
 #plt.imshow(calculation)
 '''
 
-
-
-
-
-
-
-
-
-
-
+# save all 50 GLCMs as temporary
+'''
+for i in range(len(normaBMP)):
+    curIm = normaBMP[i]
+    calculation = GLCM(curIm).glcm_complex_duplex()
+    number = i+1
+    print(number)
+    plt.imshow(calculation)
+    path = "glcm/n/n" + str(number) + ".png"
+    plt.imsave(path, calculation, cmap="inferno")
+print("norma was saved successfully")
+for i in range(len(pathoBMP)):
+    curIm = pathoBMP[i]
+    calculation = GLCM(curIm).glcm_complex_duplex()
+    number = i+1
+    print(number)
+    plt.imshow(calculation)
+    path = "glcm/p/p" + str(number) + ".png"
+    plt.imsave(path, calculation, cmap="inferno")
+print("pathology was saved successfully")
+'''
 
 numberParam = len(param)
 numberPatho = len(pathoNames)
@@ -156,32 +149,37 @@ numberPatho = len(pathoNames)
 '''
 def pseudo_scatter(fig,imgAr,name,color='b',alpha=1.,marker="."):
     global param
-    for i in range(len(imgAr)-1):
-        gray = np.array(imgAr[i])
+    try:
+        for i in range(len(imgAr)-1):
+            gray = np.array(imgAr[i])
+            stat = calculate_first_order_statistic_2D(gray)
+            for j in range(numberParam):
+                ax = fig.add_subplot(numberParam,2,j+1)
+                ax.set_title(param[j])
+                ax.scatter(stat[param[j]],stat[param[j]],color=color,
+                           alpha=alpha,marker=marker)
+        gray = np.array(imgAr[len(imgAr)-1])
         stat = calculate_first_order_statistic_2D(gray)
         for j in range(numberParam):
-            ax = fig.add_subplot(numberParam,2,j+1)
+            ax = fig.add_subplot(numberParam, 2, j + 1)
             ax.set_title(param[j])
-            ax.scatter(stat[param[j]],stat[param[j]],color=color,
-                       alpha=alpha,marker=marker)
-    gray = np.array(imgAr[len(imgAr)-1])
-    stat = calculate_first_order_statistic_2D(gray)
-    for j in range(numberParam):
-        ax = fig.add_subplot(numberParam, 2, j + 1)
-        ax.set_title(param[j])
-        ax.scatter(stat[param[numberParam-1]], stat[param[numberParam-1]], color=color,
-               alpha=alpha, label=name, marker=marker)
-        ax.legend(loc='best')
+            ax.scatter(stat[param[numberParam-1]], stat[param[numberParam-1]], color=color,
+                   alpha=alpha, label=name, marker=marker)
+            ax.legend(loc='best')
+    except IndexError:
+        print("Wrong index was chosen!")
+
 for i in range (numberPatho):
     data = array[i]
-    fig = plt.figure(num=pathoNames[i]+' + norma',figsize=(20, 10))
+    fig = plt.figure(num=pathoNames[i]+' + norma',figsize=(10, 10))
     pseudo_scatter(fig, norma,'norma','b',0.6,"v")
     pseudo_scatter(fig, array[i],pathoNames[i],'r',0.6,"^")
     fig.tight_layout()
 plt.show()
 '''
+
 # build histograms for different diseases comparing with norma
-'''
+
 def greyFrequencies(img):
     size1 = len(img)
     size2 = len(img[0])
@@ -208,7 +206,7 @@ def histogram_average_gray_frequency(imgAr,name,color='b',alpha=1.):
     plt.bar(np.arange(0,255,1),rez[0],color=color,alpha=alpha,label=name)
 number = len(pathoNames)
 for i in range (number):
-    plt.subplot(number,1,i+1)
+    plt.subplot(number+1,1,i+1)
     histogram_average_gray_frequency(norma,'norma','b',0.7)
     histogram_average_gray_frequency(array[i],pathoNames[i],'r',0.9)
     plt.title(pathoNames[i] + ' + norma')
@@ -216,7 +214,18 @@ for i in range (number):
     plt.xlabel('color')
     plt.xlim(0,255)
     plt.legend(loc='best')
-'''
+plt.subplot(number+1,1,number+1)
+histogram_average_gray_frequency(norma,'norma','b',0.7)
+histogram_average_gray_frequency(patho,'patho','r',0.9)
+plt.title('patho' + ' + norma')
+plt.ylabel('% samples') #, fontsize=18
+plt.xlabel('color')
+plt.xlim(0,255)
+plt.legend(loc='best')
+plt.show()
+
+
+
 # attempt to plot the red-blue mask on the gray image
 '''
 #img = Image.fromarray(grayAsRGB.astype(np.uint8))
@@ -266,4 +275,4 @@ plt.subplot(313)
 plt.imshow(im2arr)
 plt.title("Зображення, покрите маскою на основі GLCM")
 '''
-#plt.show()
+
