@@ -4,94 +4,20 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import matplotlib.patches as mpatches
 import os.path
-import scipy.stats as stats
 
 # inner dependencies:
 from glcm import GLCM
 from pe import PE
 from img_reader import IMGReader
 import gradients as grds
+import processing as proc
 
+#=========================================
 
-def average_RGB(img, windW, windH):
-    #укрупним области
-    w = len(img[0])
-    h = len(img)
-    ed = img
-    for i in range(h-(windH-1)):
-        for j in range(w-(windW-1)):
-            R,G,B = 0,0,0
-            for a in range (windH):
-                for b in range (windW):
-                    R += ed[i+a][j+b][0]
-                    G += ed[i+a][j+b][1]
-                    B += ed[i+a][j+b][2]
-            size = windW * windH
-            R /= size
-            G /= size
-            B /= size
-            for a in range (windH):
-                for b in range (windW):
-                    ed[i+a][j+b][0] = R
-                    ed[i+a][j+b][1] = G
-                    ed[i+a][j+b][2] = B
-    return ed
-def average_gray(img, windW, windH):
-    #укрупним области
-    w = len(img[0])
-    h = len(img)
-    ed = img
-    for i in range(h-(windH-1)):
-        for j in range(w-(windW-1)):
-            G = 0
-            for a in range (windH):
-                for b in range (windW):
-                    G += ed[i+a][j+b]
-            size = windW * windH
-            G /= size
-            for a in range (windH):
-                for b in range (windW):
-                    ed[i+a][j+b] = G
-    return ed
-# normalization to the summ
-def normalize_array_2D(table):
-    # to divide each cell by the sum of all cells
-    size1 = len(table)
-    size2 = len(table[0])
-    sum = 0
-    rez = np.zeros([size1,size2],dtype=float)
-    for i in range (size1):
-        for j in range (size2):
-            sum += table[i][j]
-    for i in range(size1):
-        for j in range(size2):
-            rez[i][j] = table[i][j]/sum
-    return rez
-# compute descriptive statistics
-def calculate_first_order_statistic_2D(data):
-    agg_measures = {
-        'avg': np.mean(data),
-        'std': np.std(data),
-        'var': np.var(data),
-        'med': np.median(data),
-        '10p': np.percentile(data, 10),
-        '25p': np.percentile(data, 25),
-        '50p': np.percentile(data, 50),
-        '75p': np.percentile(data, 75),
-        '90p': np.percentile(data, 90),
-        'iqr': np.percentile(data, 75) - np.percentile(data, 25),
-        'skw': stats.skew(data.flatten()),
-        'kur': stats.kurtosis(data.flatten())
-    }
-    return agg_measures
-param = ['avg','std','var','med','10p','25p','50p','75p','90p','iqr','skw','kur']
-
-#print("Donwloading images for a pathological and a normal state of a kidney parenchyma for our ultrasonography:")
-pathoNames = ["auh","dsh","gpb","gpc","vls"]
-
+print("Donwloading images for a pathological and a normal state of a kidney parenchyma for our ultrasonography:")
 # getting the current working directory
 cwd = os.getcwd()
-
+pathoNames = ["auh","dsh","gpb","gpc","vls"]
 norma = IMGReader.read_directory(cwd + "/data/general/norma/")
 patho = IMGReader.read_directory(cwd + "/data/general/ne-norma/")
 auh = IMGReader.read_directory(cwd + "/data/" + pathoNames[0] + "/")
@@ -106,7 +32,6 @@ array.append(gpb)
 array.append(gpc)
 array.append(vls)
 # TODO: make some data structure for all that
-
 
 # read 1 image as a test
 '''
@@ -143,7 +68,7 @@ for i in range(len(pathoBMP)):
 print("pathology was saved successfully")
 '''
 
-numberParam = len(param)
+numberParam = proc.paramNumber
 numberPatho = len(pathoNames)
 # build scatters for different 1st order stats of diseases comparing with norma
 '''
@@ -179,7 +104,6 @@ plt.show()
 '''
 
 # build histograms for different diseases comparing with norma
-
 def greyFrequencies(img):
     size1 = len(img)
     size2 = len(img[0])
