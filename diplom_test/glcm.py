@@ -1,12 +1,15 @@
 import numpy as np
 import matplotlib
-
+from processing import check_dimension
 
 class GLCM:
-    """GLCM = Gray-Level Co-Occurrence Matrix"""
-
+    """
+    GLCM = Gray-Level Co-Occurrence Matrix
+    """
     def __init__(self, gray):
-        self.gray = gray
+        if (not check_dimension(gray, 2)):
+            raise ValueError("It was received not appropriate dimension!")
+        self.image = gray
         self.h, self.w = np.shape(gray)
         self.size = 255
         self.saved = gray
@@ -17,13 +20,13 @@ class GLCM:
         enabled = np.zeros([self.size, self.size])
         for i in range(self.h):
             for j in range(self.w - 1):
-                left = self.gray[i][j]
-                right = self.gray[i][j + 1]
+                left = self.image[i][j]
+                right = self.image[i][j + 1]
                 if enabled[left - 1][right - 1] != 1:
                     for a in range(self.h):
                         for b in range(self.w - 1):
-                            newLeft = self.gray[a][b]
-                            newRight = self.gray[a][b + 1]
+                            newLeft = self.image[a][b]
+                            newRight = self.image[a][b + 1]
                             if newLeft == left and newRight == right:
                                 glcm[left - 1][right - 1] += 1
                     enabled[left - 1][right - 1] = 1
@@ -35,13 +38,13 @@ class GLCM:
         enabled = np.zeros([self.size, self.size])
         for i in range(self.h - 1):
             for j in range(self.w - 1):
-                leftLow = self.gray[i + 1][j]
-                rightUp = self.gray[i][j + 1]
+                leftLow = self.image[i + 1][j]
+                rightUp = self.image[i][j + 1]
                 if enabled[leftLow - 1][rightUp - 1] != 1:
                     for a in range(self.h - 1):
                         for b in range(self.w - 1):
-                            newLeftLow = self.gray[a + 1][b]
-                            newRightUp = self.gray[a][b + 1]
+                            newLeftLow = self.image[a + 1][b]
+                            newRightUp = self.image[a][b + 1]
                             if newLeftLow == leftLow and newRightUp == rightUp:
                                 glcm[leftLow - 1][rightUp - 1] += 1
                     enabled[leftLow - 1][rightUp - 1] = 1
@@ -53,13 +56,13 @@ class GLCM:
         enabled = np.zeros([self.size, self.size])
         for i in range(self.h - 1):
             for j in range(self.w):
-                up = self.gray[i][j]
-                low = self.gray[i + 1][j]
+                up = self.image[i][j]
+                low = self.image[i + 1][j]
                 if enabled[up - 1][low - 1] != 1:
                     for a in range(self.h - 1):
                         for b in range(self.w):
-                            newLow = self.gray[a + 1][b]
-                            newUp = self.gray[a][b]
+                            newLow = self.image[a + 1][b]
+                            newUp = self.image[a][b]
                             if (newLow == low and newUp == up):
                                 glcm[up - 1][low - 1] += 1
                     enabled[up - 1][low - 1] = 1
@@ -71,13 +74,13 @@ class GLCM:
         enabled = np.zeros([self.size, self.size])
         for i in range(self.h - 1):
             for j in range(self.w - 1):
-                leftUp = self.gray[i][j]
-                rightLow = self.gray[i + 1][j + 1]
+                leftUp = self.image[i][j]
+                rightLow = self.image[i + 1][j + 1]
                 if enabled[leftUp - 1][rightLow - 1] != 1:
                     for a in range(self.h - 1):
                         for b in range(self.w - 1):
-                            newLeftUp = self.gray[a][b]
-                            newRightLow = self.gray[a + 1][b + 1]
+                            newLeftUp = self.image[a][b]
+                            newRightLow = self.image[a + 1][b + 1]
                             if newLeftUp == leftUp and newRightLow == rightLow:
                                 glcm[leftUp - 1][rightLow - 1] += 1
                     enabled[leftUp - 1][rightLow - 1] = 1
