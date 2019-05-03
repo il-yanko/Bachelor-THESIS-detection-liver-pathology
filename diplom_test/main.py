@@ -4,12 +4,11 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import matplotlib.patches as mpatches
 import os.path
+import time
 
 # inner dependencies:
-from glcm import GLCM
-from pe import PE
-from img_reader import IMGReader
-import gradients as grds
+from glcm import GLCM, calculate_save_glcm
+from img_reader import IMGReader, rgb_to_gray
 import processing as proc
 
 #=========================================
@@ -17,7 +16,7 @@ import processing as proc
 print("Donwloading images for a pathological and a normal state of a kidney parenchyma for our ultrasonography:")
 # getting the current working directory
 cwd = os.getcwd()
-pathoNames = ["auh","dsh","gpb","gpc","vls"]
+pathoNames = ["auh", "dsh", "gpb", "gpc", "vls"]
 norma = IMGReader.read_directory(cwd + "/data/general/norma/")
 patho = IMGReader.read_directory(cwd + "/data/general/ne-norma/")
 auh = IMGReader.read_directory(cwd + "/data/" + pathoNames[0] + "/")
@@ -25,7 +24,7 @@ dsh = IMGReader.read_directory(cwd + "/data/" + pathoNames[1] + "/")
 gpb = IMGReader.read_directory(cwd + "/data/" + pathoNames[2] + "/")
 gpc = IMGReader.read_directory(cwd + "/data/" + pathoNames[3] + "/")
 vls = IMGReader.read_directory(cwd + "/data/" + pathoNames[4] + "/")
-array = []
+array = list()
 array.append(auh)
 array.append(dsh)
 array.append(gpb)
@@ -36,9 +35,11 @@ array.append(vls)
 # read 1 image as a test
 '''
 original = mpimg.imread("pathology/14.bmp")
-original = original[0:5,0:5,:]
-rawGray = rgb_to_gray(original)
-gray = np.array(rawGray)
+original = original[0:3,0:3,]
+gray = np.array(rgb_to_gray(original))
+print("gray = \n%s"%gray)
+a = []
+a.append(gray)
 #plt.imshow(original)
 #plt.imsave("tmp/tmp1.png", original)
 #calculation = glcm.GLCM(gray).glcm_complex_duplex()
@@ -46,27 +47,21 @@ gray = np.array(rawGray)
 #plt.imshow(calculation)
 '''
 
-# save all 50 GLCMs as temporary
+
+# processing and saving all GLCM-s (.csv and .png)
 '''
-for i in range(len(normaBMP)):
-    curIm = normaBMP[i]
-    calculation = GLCM(curIm).glcm_complex_duplex()
-    number = i+1
-    print(number)
-    plt.imshow(calculation)
-    path = "glcm/n/n" + str(number) + ".png"
-    plt.imsave(path, calculation, cmap="inferno")
-print("norma was saved successfully")
-for i in range(len(pathoBMP)):
-    curIm = pathoBMP[i]
-    calculation = GLCM(curIm).glcm_complex_duplex()
-    number = i+1
-    print(number)
-    plt.imshow(calculation)
-    path = "glcm/p/p" + str(number) + ".png"
-    plt.imsave(path, calculation, cmap="inferno")
-print("pathology was saved successfully")
+start_time = time.time()
+calculate_save_glcm("auh", auh)
+calculate_save_glcm("dsh", dsh)
+calculate_save_glcm("gpb", gpb)
+calculate_save_glcm("gpc", gpc)
+calculate_save_glcm("vls", vls)
+calculate_save_glcm("n", norma)
+calculate_save_glcm("p", patho)
+minutes = (time.time() - start_time) / 60
+print("--- %s minutes have passed ---" % minutes)
 '''
+
 
 numberParam = proc.paramNumber
 numberPatho = len(pathoNames)
@@ -103,51 +98,59 @@ for i in range (numberPatho):
 plt.show()
 '''
 
+
+
+
 # build histograms for different diseases comparing with norma
-def greyFrequencies(img):
+
+def gray_frequencies(img):
     size1 = len(img)
     size2 = len(img[0])
-    #print('s1=',size1,' s2=',size2)
-    rez = np.zeros((1,255))
-    for i in range (size1):
-        for j in range (size2):
-            rez [0][ img[i][j] ] += 1
-    return rez
-def histogram_average_gray_frequency(imgAr,name,color='b',alpha=1.):
     rez = np.zeros((1, 255))
-    for i in range(len(imgAr)):
-        gray = np.array(imgAr[i])
-        grFr = greyFrequencies(gray)
-        relative = np.zeros((1,255))
-        summ = np.sum(grFr[0])
-        for j in range (len(grFr[0])):
-            relative[0][j] = grFr[0][j] * 100 / summ
+    for i in range(size1):
+        for j in range(size2):
+            rez[0] [img [i] [j]] += 1
+    return rez
+
+
+def histogram_average_gray_frequency(img_ar, name, color='b', alpha=1.):
+    rez = np.zeros((1, 255))
+    for i in range(len(img_ar)):
+        gray = np.array(img_ar[i])
+        gray_freq = gray_frequencies(gray)
+        relative = np.zeros((1, 255))
+        summ = np.sum(gray_freq[0])
+        for j in range(len(gray_freq[0])):
+            relative[0][j] = gray_freq[0][j] * 100 / summ
 
         for j in range(len(rez[0])):
             rez[0][j] += relative[0][j]
     for k in range(len(rez[0])):
-        rez[0][k] /= len(imgAr[0])
-    plt.bar(np.arange(0,255,1),rez[0],color=color,alpha=alpha,label=name)
-number = len(pathoNames)
-for i in range (number):
-    plt.subplot(number+1,1,i+1)
-    histogram_average_gray_frequency(norma,'norma','b',0.7)
-    histogram_average_gray_frequency(array[i],pathoNames[i],'r',0.9)
-    plt.title(pathoNames[i] + ' + norma')
-    plt.ylabel('% samples') #, fontsize=18
-    plt.xlabel('color')
-    plt.xlim(0,255)
-    plt.legend(loc='best')
-plt.subplot(number+1,1,number+1)
-histogram_average_gray_frequency(norma,'norma','b',0.7)
-histogram_average_gray_frequency(patho,'patho','r',0.9)
-plt.title('patho' + ' + norma')
-plt.ylabel('% samples') #, fontsize=18
-plt.xlabel('color')
-plt.xlim(0,255)
-plt.legend(loc='best')
-plt.show()
+        rez[0][k] /= len(img_ar[0])
+    plt.bar(np.arange(0, 255, 1), rez[0], color=color, alpha=alpha, label=name)
 
+
+number = len(pathoNames)
+for i in range(number):
+    plt.subplot(number+1, 1, i+1)
+    histogram_average_gray_frequency(norma, 'norma', 'b', 0.7)
+    histogram_average_gray_frequency(array[i], pathoNames[i], 'r', 0.9)
+    plt.title(pathoNames[i] + ' + norma')
+    plt.ylabel('% samples')
+    plt.xlabel('color')
+    plt.xlim(0, 255)
+    plt.legend(loc='best')
+plt.subplot(number+1, 1, number+1)
+histogram_average_gray_frequency(norma, 'norma', 'b', 0.7)
+histogram_average_gray_frequency(patho, 'patho', 'r', 0.9)
+plt.title('patho' + ' + norma')
+plt.ylabel('% samples')
+plt.xlabel('color')
+plt.xlim(0, 255)
+plt.legend(loc='best')
+figManager = plt.get_current_fig_manager()
+figManager.window.showMaximized()
+plt.show()
 
 
 # attempt to plot the red-blue mask on the gray image
@@ -199,4 +202,3 @@ plt.subplot(313)
 plt.imshow(im2arr)
 plt.title("Зображення, покрите маскою на основі GLCM")
 '''
-

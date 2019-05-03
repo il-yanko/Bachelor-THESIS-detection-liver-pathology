@@ -1,14 +1,12 @@
 import numpy as np
-import matplotlib
-from processing import check_dimension
+import matplotlib.pyplot as plt
+
 
 class GLCM:
     """
     GLCM = Gray-Level Co-Occurrence Matrix
     """
     def __init__(self, gray):
-        if (not check_dimension(gray, 2)):
-            raise ValueError("It was received not appropriate dimension!")
         self.image = gray
         self.h, self.w = np.shape(gray)
         self.size = 255
@@ -25,9 +23,9 @@ class GLCM:
                 if enabled[left - 1][right - 1] != 1:
                     for a in range(self.h):
                         for b in range(self.w - 1):
-                            newLeft = self.image[a][b]
-                            newRight = self.image[a][b + 1]
-                            if newLeft == left and newRight == right:
+                            new_left = self.image[a][b]
+                            new_right = self.image[a][b + 1]
+                            if new_left == left and new_right == right:
                                 glcm[left - 1][right - 1] += 1
                     enabled[left - 1][right - 1] = 1
         return glcm
@@ -38,16 +36,16 @@ class GLCM:
         enabled = np.zeros([self.size, self.size])
         for i in range(self.h - 1):
             for j in range(self.w - 1):
-                leftLow = self.image[i + 1][j]
-                rightUp = self.image[i][j + 1]
-                if enabled[leftLow - 1][rightUp - 1] != 1:
+                left_low = self.image[i + 1][j]
+                right_up = self.image[i][j + 1]
+                if enabled[left_low - 1][right_up - 1] != 1:
                     for a in range(self.h - 1):
                         for b in range(self.w - 1):
-                            newLeftLow = self.image[a + 1][b]
-                            newRightUp = self.image[a][b + 1]
-                            if newLeftLow == leftLow and newRightUp == rightUp:
-                                glcm[leftLow - 1][rightUp - 1] += 1
-                    enabled[leftLow - 1][rightUp - 1] = 1
+                            new_left_low = self.image[a + 1][b]
+                            new_right_up = self.image[a][b + 1]
+                            if new_left_low == left_low and new_right_up == right_up:
+                                glcm[left_low - 1][right_up - 1] += 1
+                    enabled[left_low - 1][right_up - 1] = 1
         return glcm
 
     def glcm_90(self):
@@ -61,9 +59,9 @@ class GLCM:
                 if enabled[up - 1][low - 1] != 1:
                     for a in range(self.h - 1):
                         for b in range(self.w):
-                            newLow = self.image[a + 1][b]
-                            newUp = self.image[a][b]
-                            if (newLow == low and newUp == up):
+                            new_low = self.image[a + 1][b]
+                            new_up = self.image[a][b]
+                            if new_low == low and new_up == up:
                                 glcm[up - 1][low - 1] += 1
                     enabled[up - 1][low - 1] = 1
         return glcm
@@ -74,16 +72,16 @@ class GLCM:
         enabled = np.zeros([self.size, self.size])
         for i in range(self.h - 1):
             for j in range(self.w - 1):
-                leftUp = self.image[i][j]
-                rightLow = self.image[i + 1][j + 1]
-                if enabled[leftUp - 1][rightLow - 1] != 1:
+                left_up = self.image[i][j]
+                right_low = self.image[i + 1][j + 1]
+                if enabled[left_up - 1][right_low - 1] != 1:
                     for a in range(self.h - 1):
                         for b in range(self.w - 1):
-                            newLeftUp = self.image[a][b]
-                            newRightLow = self.image[a + 1][b + 1]
-                            if newLeftUp == leftUp and newRightLow == rightLow:
-                                glcm[leftUp - 1][rightLow - 1] += 1
-                    enabled[leftUp - 1][rightLow - 1] = 1
+                            new_left_up = self.image[a][b]
+                            new_right_low = self.image[a + 1][b + 1]
+                            if new_left_up == left_up and new_right_low == right_low:
+                                glcm[left_up - 1][right_low - 1] += 1
+                    enabled[left_up - 1][right_low - 1] = 1
         return glcm
 
     def glcm_complex(self):
@@ -110,6 +108,21 @@ class GLCM:
                + self.glcm_gen_duplex(self.glcm_45) \
                + self.glcm_gen_duplex(self.glcm_90) \
                + self.glcm_gen_duplex(self.glcm_135)
+
+
+def calculate_save_glcm(short_name, array):
+    for i in range(len(array)):
+        cur_im = array[i]
+        calculation = GLCM(cur_im).glcm_complex_duplex()
+        number = i + 1
+        print(number)
+        # image
+        path = "glcm/" + short_name + "/png/" + short_name + str(number) + ".png"
+        plt.imsave(path, calculation, cmap="inferno")
+        # data
+        path = "glcm/" + short_name + "/csv/" + short_name + str(number) + ".csv"
+        np.savetxt(path, calculation, fmt="%d", delimiter=",")
+    print(short_name, " was saved successfully")
 
 
 # garbage processing

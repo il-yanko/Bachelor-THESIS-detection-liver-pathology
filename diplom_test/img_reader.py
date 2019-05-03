@@ -1,46 +1,49 @@
 import glob
 import numpy as np
+import matplotlib.image as mpimg
 from PIL import Image
+import os.path
+
 
 class IMGReader:
     def __init__(self):
         pass
+
     @staticmethod
-    def read_directory(dir_path, format=None):
-        images = []
+    def read_directory(dir_path, file_format=None):
         try:
             images = [np.asarray(Image.open(img_path).convert('L'), dtype=np.uint8)
-                      for img_path in glob.glob(dir_path + "*" + (("." + format) if format else ""))]
-            print(len(images), "фото было загружено")
+                      for img_path in glob.glob(dir_path + "*" + (("." + file_format) if file_format else ""))]
+            print("It was loaded", len(images), "images")
+            return images
         except Exception as e:
             print(e)
-        return images
+            return
 
 
 # ALTERNATIVE LOADER:
-'''
-import os.path
 # process RGB/grayscale
 def rgb_to_gray(rgb):
-    #скалярное произведение начальных цветов с определенными теоретическими коэффициентами по системе YUV
-    return np.dot(rgb[...,:3], [0.299, 0.587, 0.114]).round(3).astype(int)
+    # scalar product of colors with certain theoretical coefficients according to the YUV system
+    return np.dot(rgb[..., :3], [0.299, 0.587, 0.114]).round(3).astype(int)
+
 
 # download folder BMP
-def get_all_BMP(fullDir):
+def get_all_bmp(full_dir):
     # to calculate number of files in the folder
-    fileNumber = len(next(os.walk(fullDir))[2])
+    file_number = len(next(os.walk(full_dir))[2])
     # print(fileNumber, "files were found")
-    imgArr = []
-    for i in range(1, fileNumber + 1):
-        imgArr.append(mpimg.imread(fullDir + '/' + str(i) + ".bmp"))
-    print(len(imgArr), "images were downloaded")
-    return imgArr
+    img_arr = list()
+    for i in range(1, file_number + 1):
+        img_arr.append(mpimg.imread(full_dir + '/' + str(i) + ".bmp"))
+    print(len(img_arr), "images were downloaded")
+    return img_arr
 
-def get_all_img_make_gray(cwd, folderName):
-    path = cwd + "/" + folderName
+
+def get_all_img_make_gray(cwd, folder_name):
+    path = cwd + "/" + folder_name
     print("\nPath = ", path)
-    imgArray = get_all_BMP(path)
-    for i in range(len(imgArray)):
-        imgArray[i] = rgb_to_gray(imgArray[i])
-    return imgArray
-'''
+    img_arr = get_all_bmp(path)
+    for i in range(len(img_arr)):
+        img_arr[i] = rgb_to_gray(img_arr[i])
+    return img_arr

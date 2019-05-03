@@ -3,7 +3,7 @@ from pyentrp import entropy as ent
 import fop
 
 
-class pe:
+class PE:
     def __init__(self, array):
         self.base = array
         self.length = len(self.base)
