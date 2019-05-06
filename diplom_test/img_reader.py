@@ -14,7 +14,7 @@ class IMGReader:
         try:
             images = [np.asarray(Image.open(img_path).convert('L'), dtype=np.uint8)
                       for img_path in glob.glob(dir_path + "*" + (("." + file_format) if file_format else ""))]
-            print("It was loaded", len(images), "images")
+            print("It was loaded", len(images), "images from", dir_path)
             return images
         except Exception as e:
             print(e)

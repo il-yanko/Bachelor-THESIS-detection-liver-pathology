@@ -99,54 +99,45 @@ plt.show()
 '''
 
 
-
-
-# build histograms for different diseases comparing with norma
-
-def gray_frequencies(img):
-    size1 = len(img)
-    size2 = len(img[0])
-    rez = np.zeros((1, 255))
-    for i in range(size1):
-        for j in range(size2):
-            rez[0] [img [i] [j]] += 1
-    return rez
-
-
-def histogram_average_gray_frequency(img_ar, name, color='b', alpha=1.):
-    rez = np.zeros((1, 255))
-    for i in range(len(img_ar)):
-        gray = np.array(img_ar[i])
-        gray_freq = gray_frequencies(gray)
-        relative = np.zeros((1, 255))
-        summ = np.sum(gray_freq[0])
-        for j in range(len(gray_freq[0])):
-            relative[0][j] = gray_freq[0][j] * 100 / summ
-
-        for j in range(len(rez[0])):
-            rez[0][j] += relative[0][j]
-    for k in range(len(rez[0])):
-        rez[0][k] /= len(img_ar[0])
-    plt.bar(np.arange(0, 255, 1), rez[0], color=color, alpha=alpha, label=name)
-
-
+# build color distribution for different diseases comparing with norma
+'''
 number = len(pathoNames)
 for i in range(number):
     plt.subplot(number+1, 1, i+1)
-    histogram_average_gray_frequency(norma, 'norma', 'b', 0.7)
-    histogram_average_gray_frequency(array[i], pathoNames[i], 'r', 0.9)
+    proc.average_gray_frequency_distribution(plt, norma, 'norma', 'b', 0.6)
+    proc.average_gray_frequency_distribution(plt, array[i], pathoNames[i], 'r', 0.6)
     plt.title(pathoNames[i] + ' + norma')
     plt.ylabel('% samples')
     plt.xlabel('color')
     plt.xlim(0, 255)
+    plt.ylim(0, 4.5)
     plt.legend(loc='best')
 plt.subplot(number+1, 1, number+1)
-histogram_average_gray_frequency(norma, 'norma', 'b', 0.7)
-histogram_average_gray_frequency(patho, 'patho', 'r', 0.9)
-plt.title('patho' + ' + norma')
+proc.average_gray_frequency_distribution(plt, norma, 'norma', 'b', 0.6)
+proc.average_gray_frequency_distribution(plt, patho, 'patho', 'r', 0.6)
+plt.title('patho + norma')
 plt.ylabel('% samples')
 plt.xlabel('color')
 plt.xlim(0, 255)
+plt.ylim(0, 4.5)
+plt.legend(loc='best')
+figManager = plt.get_current_fig_manager()
+figManager.window.showMaximized()
+plt.show()
+'''
+
+# build color distribution for different diseases comparing with each other
+proc.average_gray_frequency_distribution(plt, array[0], pathoNames[0], 'red', 0.9)
+proc.average_gray_frequency_distribution(plt, array[1], pathoNames[1], 'black', 0.9)
+proc.average_gray_frequency_distribution(plt, array[2], pathoNames[2], 'gold', 0.9)
+proc.average_gray_frequency_distribution(plt, array[3], pathoNames[3], 'olive', 0.9)
+proc.average_gray_frequency_distribution(plt, array[4], pathoNames[4], 'blue', 0.9)
+
+plt.title('patho + norma')
+plt.ylabel('% samples')
+plt.xlabel('color')
+plt.xlim(0, 255)
+plt.ylim(0, 4.5)
 plt.legend(loc='best')
 figManager = plt.get_current_fig_manager()
 figManager.window.showMaximized()
@@ -201,4 +192,18 @@ im2arr = np.array(img)
 plt.subplot(313)
 plt.imshow(im2arr)
 plt.title("Зображення, покрите маскою на основі GLCM")
+'''
+
+
+# binarization of the image
+'''
+photo = norma[0]
+plt.subplot(2,1,1)
+plt.imshow(photo,cmap="gray")
+# change!
+threshold = 100
+photo = np.where(photo>threshold,255,0)
+plt.subplot(2,1,2)
+plt.imshow(photo,cmap="gray")
+plt.show()
 '''
