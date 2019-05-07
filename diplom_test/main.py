@@ -8,15 +8,27 @@ import time
 
 # inner dependencies:
 from glcm import GLCM, calculate_save_glcm
-from img_reader import IMGReader, rgb_to_gray
+from data_reader import IMGReader, DataReader, rgb_to_gray
 import processing as proc
 
 #=========================================
 
-print("Donwloading images for a pathological and a normal state of a kidney parenchyma for our ultrasonography:")
+class Pathology:
+    def __init__(self,data=None,name=None):
+        self.data = data
+        if(isinstance(name, str)):
+            self.name = name
+        else:
+            raise Exception("name is not a string")
+
 # getting the current working directory
 cwd = os.getcwd()
 pathoNames = ["auh", "dsh", "gpb", "gpc", "vls"]
+
+# downloading images
+'''
+print("Donwloading images for a pathological and a normal state of a kidney parenchyma for our ultrasonography:")
+
 norma = IMGReader.read_directory(cwd + "/data/general/norma/")
 patho = IMGReader.read_directory(cwd + "/data/general/ne-norma/")
 auh = IMGReader.read_directory(cwd + "/data/" + pathoNames[0] + "/")
@@ -31,6 +43,7 @@ array.append(gpb)
 array.append(gpc)
 array.append(vls)
 # TODO: make some data structure for all that
+'''
 
 # read 1 image as a test
 '''
@@ -47,7 +60,6 @@ a.append(gray)
 #plt.imshow(calculation)
 '''
 
-
 # processing and saving all GLCM-s (.csv and .png)
 '''
 start_time = time.time()
@@ -62,42 +74,18 @@ minutes = (time.time() - start_time) / 60
 print("--- %s minutes have passed ---" % minutes)
 '''
 
+# numberPatho = len(pathoNames)
 
-numberParam = proc.paramNumber
-numberPatho = len(pathoNames)
 # build scatters for different 1st order stats of diseases comparing with norma
 '''
-def pseudo_scatter(fig,imgAr,name,color='b',alpha=1.,marker="."):
-    global param
-    try:
-        for i in range(len(imgAr)-1):
-            gray = np.array(imgAr[i])
-            stat = calculate_first_order_statistic_2D(gray)
-            for j in range(numberParam):
-                ax = fig.add_subplot(numberParam,2,j+1)
-                ax.set_title(param[j])
-                ax.scatter(stat[param[j]],stat[param[j]],color=color,
-                           alpha=alpha,marker=marker)
-        gray = np.array(imgAr[len(imgAr)-1])
-        stat = calculate_first_order_statistic_2D(gray)
-        for j in range(numberParam):
-            ax = fig.add_subplot(numberParam, 2, j + 1)
-            ax.set_title(param[j])
-            ax.scatter(stat[param[numberParam-1]], stat[param[numberParam-1]], color=color,
-                   alpha=alpha, label=name, marker=marker)
-            ax.legend(loc='best')
-    except IndexError:
-        print("Wrong index was chosen!")
-
 for i in range (numberPatho):
     data = array[i]
     fig = plt.figure(num=pathoNames[i]+' + norma',figsize=(10, 10))
-    pseudo_scatter(fig, norma,'norma','b',0.6,"v")
-    pseudo_scatter(fig, array[i],pathoNames[i],'r',0.6,"^")
+    proc.pseudo_scatter(fig, norma,'norma','b',0.6,"v")
+    proc.pseudo_scatter(fig, array[i],pathoNames[i],'r',0.6,"^")
     fig.tight_layout()
 plt.show()
 '''
-
 
 # build color distribution for different diseases comparing with norma
 '''
@@ -127,6 +115,7 @@ plt.show()
 '''
 
 # build color distribution for different diseases comparing with each other
+'''
 proc.average_gray_frequency_distribution(plt, array[0], pathoNames[0], 'red', 0.9)
 proc.average_gray_frequency_distribution(plt, array[1], pathoNames[1], 'black', 0.9)
 proc.average_gray_frequency_distribution(plt, array[2], pathoNames[2], 'gold', 0.9)
@@ -142,7 +131,7 @@ plt.legend(loc='best')
 figManager = plt.get_current_fig_manager()
 figManager.window.showMaximized()
 plt.show()
-
+'''
 
 # attempt to plot the red-blue mask on the gray image
 '''
@@ -194,16 +183,22 @@ plt.imshow(im2arr)
 plt.title("Зображення, покрите маскою на основі GLCM")
 '''
 
-
-# binarization of the image
+# make binarization of one image
 '''
 photo = norma[0]
 plt.subplot(2,1,1)
 plt.imshow(photo,cmap="gray")
 # change!
 threshold = 100
-photo = np.where(photo>threshold,255,0)
+photo = proc.binarization(photo,threshold)
 plt.subplot(2,1,2)
 plt.imshow(photo,cmap="gray")
 plt.show()
 '''
+
+
+
+auh = cwd + "/glcm/" + pathoNames[0] + "/csv/"
+data = DataReader.read_directory(auh)
+
+
