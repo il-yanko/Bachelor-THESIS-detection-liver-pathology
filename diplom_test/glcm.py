@@ -125,6 +125,112 @@ def calculate_save_glcm(short_name, array):
     print(short_name, " was saved successfully")
 
 
+class GLCMEquations:
+    def __init__(self, matrix):
+        self.matrix = matrix
+
+    # f1
+    def energy(self):
+        return np.sum(np.power(self.matrix.flatten(), 2))
+
+    # f2
+    def contrast(self):
+        res_contrast = 0
+
+        for i in range(self.matrix.shape[0]):
+            for j in range(self.matrix.shape[1]):
+                res_contrast += self.matrix[i][j] * (i - j) ** 2
+        return res_contrast
+
+    def homogenity(self):
+        res_homog = 0
+
+        for i in range(self.matrix.shape[0]):
+            for j in range(self.matrix.shape[1]):
+                res_homog += self.matrix[i][j]/(1 + (i - j) ** 2)
+
+        return res_homog
+
+    # f3
+    def correlation(self):
+        variance = self.variance()
+        mean = self.mean()
+
+        res_corr = 0
+        for i in range(self.matrix.shape[0]):
+            for j in range(self.matrix.shape[1]):
+                res_corr += self.matrix[i][j]\
+                           * (((i - mean) * (j - mean)) / variance**2)
+        return res_corr
+
+    def mean(self):
+        return self.matrix.flatten().mean()
+    # f4
+
+    def variance(self):
+        mean = self.mean()
+
+        result = 0
+        for i in range(self.matrix.shape[0]):
+            for j in range(self.matrix.shape[1]):
+                result += (i - mean) ** 2 * self.matrix[i][j]
+        return result
+
+    def glcm_mean(self):
+        m = 0
+        for i in range(self.matrix.shape[0]):
+            for j in range(self.matrix.shape[1]):
+                m += i * self.matrix[i][j]
+        return
+
+    def glcm_variance(self):
+        v = 0
+        m = self.glcm_mean()
+        for i in range(self.matrix.shape[0]):
+            for j in range(self.matrix.shape[1]):
+                v += self.matrix[i][j] * ((i - m) ** 2)
+        return v
+
+    def calc_A(self):
+        pass
+
+    # f5
+    def inverse_difference_moment(self):
+        pass
+
+    # f6
+    def sum_average(self):
+        pass
+
+    # f7
+    def sum_variance(self):
+        pass
+
+    # f8
+    def sum_entropy(self):
+        pass
+
+    # f9
+    def entropy(self):
+        res_entr = 0
+        for i in range(self.matrix.shape[0]):
+            for j in range(self.matrix.shape[1]):
+                if self.matrix[i][j] != 0:
+                    res_entr += -np.log(self.matrix[i][j]) * self.matrix[i][j]
+        return res_entr
+
+    # f10
+    def differnce_variance(self):
+        pass
+
+    # f11
+    def differnce_entropy(self):
+        pass
+
+    # f14
+    def max_correlation_coeff(self):
+        pass
+
 # garbage processing
 # processing and saving of GLCM (.csv)
 '''

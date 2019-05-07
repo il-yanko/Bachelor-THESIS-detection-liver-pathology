@@ -61,11 +61,14 @@ def normalize_2d_to_sum(data):
     # division of each cell by the sum of all cells
     size1 = len(data)
     size2 = len(data[0])
-    cur_sum = 0
+    cur_sum = 0.
     rez = np.zeros([size1, size2], dtype=float)
-    for i in range(size1):
-        for j in range(size2):
-            cur_sum += data[i][j]
+    if isinstance(data, np.ndarray):
+        cur_sum = np.asarray(data.flatten(), dtype=np.float64).sum()
+    else:
+        for i in range(size1):
+            for j in range(size2):
+                cur_sum += data[i][j]
     for i in range(size1):
         for j in range(size2):
             rez[i][j] = data[i][j] / cur_sum
@@ -118,12 +121,12 @@ def get_dimension(testlist, dim=0):
 
 def data_dimension_is(testlist, dim):
     try:
-        if (isinstance(testlist, np.ndarray)):
+        if isinstance(testlist, np.ndarray):
             cur_dim = len(testlist.shape)
             if cur_dim == dim:
                 return True
             else:
-                return False
+                raise NotAppropriateDimensionException
         else:
             cur_dim = get_dimension(testlist)
             if cur_dim != dim:
@@ -142,8 +145,9 @@ def gray_frequencies(img):
     rez = np.zeros((1, 255))
     for i in range(size1):
         for j in range(size2):
-            rez[0] [img [i] [j]] += 1
+            rez[0][img[i][j]] += 1
     return rez
+
 
 def average_gray_frequency_distribution(plt, img_ar, name, color='b', alpha=1., lw=2.5):
     aver_rez = np.zeros((1, 255))
@@ -163,8 +167,35 @@ def average_gray_frequency_distribution(plt, img_ar, name, color='b', alpha=1., 
     # divide to the resulting array by the number of images to get average result
     for l in range(len(aver_rez[0])):
         aver_rez[0][l] /= array_size
-    #plt.bar(np.arange(0, 255, 1), aver_rez[0], color=color, alpha=alpha, label=name)
-    plt.plot(aver_rez[0], color=color, alpha=alpha, label=name,linewidth=lw)
+    # plt.bar(np.arange(0, 255, 1), aver_rez[0], color=color, alpha=alpha, label=name)
+    plt.plot(aver_rez[0], color=color, alpha=alpha, label=name, linewidth=lw)
+
+
+# binarization of the image
+def binarization(image, threshold): return np.where(image > threshold, 255, 0)
+
+
+def pseudo_scatter(fig, img_array, name, color='b', alpha=1., marker="."):
+    global param
+    try:
+        for i in range(len(img_array) - 1):
+            gray = np.array(img_array[i])
+            stat = calculate_first_order_statistic_2d(gray)
+            for j in range(paramNumber):
+                ax = fig.add_subplot(paramNumber, 2, j+1)
+                ax.set_title(param[j])
+                ax.scatter(stat[param[j]], stat[param[j]], color=color,
+                           alpha=alpha, marker=marker)
+        gray = np.array(img_array[len(img_array) - 1])
+        stat = calculate_first_order_statistic_2d(gray)
+        for j in range(paramNumber):
+            ax = fig.add_subplot(paramNumber, 2, j+1)
+            ax.set_title(param[j])
+            ax.scatter(stat[param[paramNumber-1]], stat[param[paramNumber-1]], color=color,
+                   alpha=alpha, label=name, marker=marker)
+            ax.legend(loc='best')
+    except IndexError:
+        print("Wrong index was chosen!")
 
 
 # tests for get_dimension()
@@ -184,10 +215,10 @@ print (get_dimension(a))
 '''
 # tests for normalize_2d_to_sum()
 '''
-a=[[1,2,3],[1,2,3]]
+a=np.array([[1,2,3],[1,2,3]])
 a=normalize_2d_to_sum(a)
 print(a)
-b=[[[1,2,3],[4,5,6]], [[1,2,3],[4,5,6]], [[1,2,3],[4,5,6]]]
+b=np.array([[[1,2,3],[4,5,6]], [[1,2,3],[4,5,6]], [[1,2,3],[4,5,6]]])
 b=normalize_2d_to_sum(b)
 print(b)
 '''
@@ -208,5 +239,5 @@ print("dimensions = ",len(a.shape))
 if data_dimension_is(a, 3):
     print("all is OK'ay!")
 else:
-    print("shit happens")
+    print("error")
 '''

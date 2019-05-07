@@ -20,6 +20,20 @@ class IMGReader:
             print(e)
             return
 
+class DataReader:
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def read_directory(dir_path, file_format=None):
+        try:
+            images = [np.asarray(np.genfromtxt(img_path, delimiter=','), dtype=np.float64)
+                      for img_path in glob.glob(dir_path + "*" + (("." + file_format) if file_format else ""))]
+            print("It was loaded", len(images), "datafiles from", dir_path)
+            return images
+        except Exception as e:
+            print(e)
+            return
 
 # ALTERNATIVE LOADER:
 # process RGB/grayscale
@@ -47,3 +61,12 @@ def get_all_img_make_gray(cwd, folder_name):
     for i in range(len(img_arr)):
         img_arr[i] = rgb_to_gray(img_arr[i])
     return img_arr
+
+# test load .csv
+'''
+import os.path
+cwd = os.getcwd()
+a = cwd + "/glcm/auh/csv/"
+data = DataReader.read_directory(a)
+print(data[0])
+'''
