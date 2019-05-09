@@ -2,6 +2,7 @@
 
 from radiomics import featureextractor  # This module is used for interaction with pyradiomics
 import numpy as np
+import pandas as pd
 import os.path
 import cv2
 import nrrd
@@ -48,7 +49,8 @@ sl = "/"
 folderNames = ["auh", "dsh", "hpb", "hpc", "wls", "norm", "patho"]
 folderNumber = len(folderNames)
 
-
+# Save all BMP-s as NRRD-s
+'''
 # Declare the source of the data
 data = dict()
 for i in range(folderNumber):
@@ -76,27 +78,24 @@ for i in range (folderNumber):
         # Save the image as NRRD
         nrrd.write(image_path_to, image)
         nrrd.write(label_path_to, label)
-
-
 '''
-folder = "/data/" + "auh" + "/"
+
+# Alternative for 1 image
+'''
+# Declare the destination of the data
+folder = "/data/bmp/" + "auh" + "/"
 name = "2" + ".bmp"
 path_from = os.getcwd() + folder + name
 
 # Load our 2D image
 image = cv2.imread(path_from)
 image = np.array(rgb_to_gray(image))
-'''
+
 # Add 1 additional axis for future Radiomics processing
-'''
 image = image[..., np.newaxis]
 label = np.ones(shape=image.shape)
-'''
 
-
-'''
 # Declare the source of the data
-
 folder = "data/nrrd/" + "auh"
 name_image = "auh" + "_image_" + "2" + ".nrrd"
 name_label = "auh" + "_label_" + "2" + ".nrrd"
@@ -111,20 +110,42 @@ nrrd.write(label_path_to, label)
 '''
 
 
+data_array = list()
+# Declare the source of NRRD data
+for i in range(folderNumber):
+    # folderNumber
+    path = os.getcwd() + "/data/nrrd/" + folderNames[i] + sl
+    # Calculate number of files in the folder
+    fileNumber = int (len(next(os.walk(path))[2]) / 2)
 
-'''
-readdata, header = nrrd.read(image_path)
+    for j in range (fileNumber):
+        # fileNumber
+        name_image = folderNames[i] + "_image_" + str(j) + ".nrrd"
+        name_label = folderNames[i] + "_label_" + str(j) + ".nrrd"
+        image_path_to = path + name_image
+        label_path_to = path + name_label
+    #print(fileNumber, "files were found")
 
-# Instantiate the extractor
-extractor = featureextractor.RadiomicsFeaturesExtractor()
+        # Instantiate the extractor
+        extractor = featureextractor.RadiomicsFeaturesExtractor()
+        extractor.disableAllFeatures()
+        extractor.enableFeatureClassByName('firstorder')
+        extractor.enableFeatureClassByName('glcm')
+        extractor.enableFeatureClassByName('glrlm')
+        extractor.enableFeatureClassByName('ngtdm')
+        extractor.enableFeatureClassByName('gldm')
 
-print("Extraction parameters:\n\t", extractor.settings)
-print("Enabled filters:\n\t", extractor._enabledImagetypes)
-print("Enabled features:\n\t", extractor._enabledFeatures)
+        #print("Extraction parameters:\n\t", extractor.settings)
+        #print("Enabled filters:\n\t", extractor._enabledImagetypes)
+        #print("Enabled features:\n\t", extractor._enabledFeatures)
 
-result = extractor.execute(image_path, label_path)
+        # result -> ordered dict
+        result = extractor.execute(image_path_to, label_path_to)
+        result['file_name'] = folderNames[i] + str(j)
+        #for key, value in result.items():
+        #    print(key, ":", value)
+        data_array.append(result)
 
-print("Calculated features:")
-for key, value in result.items():
-    print ("\t", key, ":", value)
-'''
+
+df =  pd.DataFrame(data_array)
+df.to_csv(os.getcwd() + '/data/nrrd/' + 'features.csv')
