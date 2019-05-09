@@ -11,3 +11,9 @@ def bmp_to_png(full_dir):
     for file in glob.glob(full_dir + "*.bmp"):
         img = cv2.imread(file)
         cv2.imwrite(file[:-3] + "png", img)
+
+'''
+import os.path
+path = os.getcwd() + "/data/bmp/ne-norma/"
+png_to_bmp(path)
+'''

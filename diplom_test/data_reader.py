@@ -1,11 +1,11 @@
 import glob
 import numpy as np
-import matplotlib.image as mpimg
+import cv2
 from PIL import Image
 import os.path
 
 
-class IMGReader:
+class ImgReader:
     def __init__(self):
         pass
 
@@ -49,7 +49,7 @@ def get_all_bmp(full_dir):
     # print(fileNumber, "files were found")
     img_arr = list()
     for i in range(1, file_number + 1):
-        img_arr.append(mpimg.imread(full_dir + '/' + str(i) + ".bmp"))
+        img_arr.append(cv2.imread(full_dir + '/' + str(i) + ".bmp"))
     print(len(img_arr), "images were downloaded")
     return img_arr
 

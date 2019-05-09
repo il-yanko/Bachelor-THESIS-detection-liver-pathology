@@ -8,7 +8,7 @@ import time
 
 # inner dependencies:
 from glcm import GLCM, calculate_save_glcm
-from data_reader import IMGReader, DataReader, rgb_to_gray
+from data_reader import ImgReader, DataReader, rgb_to_gray
 import processing as proc
 
 #=========================================
@@ -24,6 +24,7 @@ class Pathology:
 # getting the current working directory
 cwd = os.getcwd()
 pathoNames = ["auh", "dsh", "gpb", "gpc", "vls"]
+numberPatho = len(pathoNames)
 
 # downloading images
 '''
@@ -74,7 +75,7 @@ minutes = (time.time() - start_time) / 60
 print("--- %s minutes have passed ---" % minutes)
 '''
 
-# numberPatho = len(pathoNames)
+
 
 # build scatters for different 1st order stats of diseases comparing with norma
 '''
@@ -197,8 +198,8 @@ plt.show()
 '''
 
 
-
-auh = cwd + "/glcm/" + pathoNames[0] + "/csv/"
-data = DataReader.read_directory(auh)
-
-
+pathoData = list()
+for i in range(numberPatho):
+    path = cwd + "/glcm/" + pathoNames[i] + "/csv/"
+    P = Pathology(DataReader.read_directory(path,"bmp"), pathoNames[i])
+    pathoData.append(P)
