@@ -46,16 +46,16 @@ def create_directory(directory):
 
 
 sl = "/"
-folderNames = ["auh", "dsh", "hpb", "hpc", "wls", "norm", "patho"]
+folderNames = ["norm","auh", "dsh", "hpb", "hpc", "wls"]
 folderNumber = len(folderNames)
 
-# Save all BMP-s as NRRD-s
+# Save all PNG-s as NRRD-s
 '''
 # Declare the source of the data
 data = dict()
 for i in range(folderNumber):
-    path = os.getcwd() + "/data/bmp/" + folderNames[i] + sl
-    data[folderNames[i]] = ImgReader.read_directory(path, "bmp")
+    path = os.getcwd() + "/data/png/" + folderNames[i] + sl
+    data[folderNames[i]] = ImgReader.read_directory(path, "png")
 
 
 for i in range (folderNumber):
@@ -141,11 +141,12 @@ for i in range(folderNumber):
 
         # result -> ordered dict
         result = extractor.execute(image_path_to, label_path_to)
-        result['file_name'] = folderNames[i] + str(j)
+        result['data_source'] = folderNames[i] + str(j)
+        result['diagnosis_code'] = i
         #for key, value in result.items():
         #    print(key, ":", value)
         data_array.append(result)
 
 
 df =  pd.DataFrame(data_array)
-df.to_csv(os.getcwd() + '/data/nrrd/' + 'features.csv')
+df.to_csv(os.getcwd() + '/data/nrrd/' + 'features.csv', sep=";")
