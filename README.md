@@ -6,7 +6,7 @@ It is my thesis project at Igor Sikorsky Kyiv Polytechnic Institute.
 - [x] GLCM (Gray-Level Co-Occurrence Matrix)
 - [ ] GLAM (Gray-Level  Aura  Matrix)
 - [ ] GLNM Gray-Level  Neighbor  Matrix
-- [ ] GLRLM (Gray-Level Long Run Matrix)
-- [ ] NGLDM (Neighborhood Gray-Level Different Matrix)
+- [x] GLRLM (Gray-Level Long Run Matrix)
+- [x] NGLDM (Neighborhood Gray-Level Different Matrix)
 - [ ] GLSZM (Gray-Level Size Zone Matrix)
-- [ ] GLDM (Gray-Level Dependence Matrix)
+- [x] GLDM (Gray-Level Dependence Matrix)
