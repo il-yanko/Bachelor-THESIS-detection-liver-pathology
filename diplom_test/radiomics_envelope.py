@@ -46,7 +46,8 @@ def create_directory(directory):
 
 
 sl = "/"
-folderNames = ["norm","auh", "dsh", "hpb", "hpc", "wls"]
+folderNames = ["norm","auh",  "hpb", "hpc", "wls"]
+# add "dsh" to add dysholia (almost like a norm)
 folderNumber = len(folderNames)
 
 # Save all PNG-s as NRRD-s
@@ -112,6 +113,10 @@ nrrd.write(label_path_to, label)
 
 data_array = list()
 # Declare the source of NRRD data
+
+
+
+
 for i in range(folderNumber):
     # folderNumber
     path = os.getcwd() + "/data/nrrd/" + folderNames[i] + sl
@@ -141,12 +146,27 @@ for i in range(folderNumber):
 
         # result -> ordered dict
         result = extractor.execute(image_path_to, label_path_to)
-        result['data_source'] = folderNames[i] + str(j)
+        result['data_source'] = folderNames[i]
         result['diagnosis_code'] = i
-        #for key, value in result.items():
-        #    print(key, ":", value)
+        # for each special disease 0 or 1
+        for k in range (folderNumber):
+            column = str("is" + str(folderNames[k]))
+            if folderNames[i] == folderNames[k]:
+                result[column] = 1
+            else:
+                result[column] = 0
         data_array.append(result)
 
 
 df =  pd.DataFrame(data_array)
-df.to_csv(os.getcwd() + '/data/nrrd/' + 'features.csv', sep=";")
+toBeDeleted = ['diagnostics_Versions_PyRadiomics', 'diagnostics_Versions_Numpy',
+               'diagnostics_Versions_SimpleITK', 'diagnostics_Versions_PyWavelet',
+               'diagnostics_Versions_Python','diagnostics_Configuration_Settings',
+               'diagnostics_Configuration_EnabledImageTypes','diagnostics_Image-original_Hash',
+               'diagnostics_Image-original_Spacing','diagnostics_Image-original_Size',
+               'diagnostics_Mask-original_Hash', 'diagnostics_Mask-original_Spacing',
+               'diagnostics_Mask-original_Size', 'diagnostics_Mask-original_BoundingBox',
+               'diagnostics_Mask-original_VoxelNum', 'diagnostics_Mask-original_VolumeNum',
+               'diagnostics_Mask-original_CenterOfMassIndex','diagnostics_Mask-original_CenterOfMass']
+df = df.drop(toBeDeleted, axis=1)
+df.to_csv(os.getcwd() + '/data/result/' + 'features.csv', sep=";",float_format=None)
