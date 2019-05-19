@@ -2,7 +2,7 @@
 
 It is my thesis project at Igor Sikorsky Kyiv Polytechnic Institute.
 
-### Feature Extracting Techniques
+### Feature Extracting Techniques:
 - [x] GLCM (Gray-Level Co-Occurrence Matrix)
 - [x] GLRLM (Gray-Level Long Run Matrix)
 - [x] GLDM (Gray-Level Dependence Matrix)
@@ -10,3 +10,7 @@ It is my thesis project at Igor Sikorsky Kyiv Polytechnic Institute.
 - [ ] GLSZM (Gray-Level Size Zone Matrix)
 - [ ] GLAM (Gray-Level  Aura  Matrix)
 - [ ] GLNM (Gray-Level  Neighbor  Matrix)
+
+### Classification Approaches:
+- [x] Multinomial Logistic Regression (multinomial logit)
+- [x] XGBoost (eXtreme Gradient Boosting)
