@@ -10,7 +10,7 @@ sns.set(style="whitegrid", color_codes=True)
 from sklearn.feature_selection import SelectFromModel
 from sklearn.model_selection import train_test_split
 from sklearn import linear_model
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, classification_report
 from xgboost import XGBClassifier, plot_importance
 
 path = "data/result/features.csv"
@@ -20,11 +20,13 @@ chosen = ["original_glrlm_RunEntropy",
           "original_gldm_GrayLevelNonUniformity",
           "diagnostics_Image-original_Mean"
           ]
-          #,"diagnosis_code"]
-chosen1 = [#"original_glcm_Imc1",
-          #"original_glcm_ClusterShade",
-          "original_glrlm_LongRunHighGrayLevelEmphasis",
-          "original_glrlm_RunLengthNonUniformity"
+
+chosen1 = [
+            "diagnostics_Image-original_Mean",
+            "diagnostics_Image-original_Minimum",
+            "diagnostics_Image-original_Maximum",
+            "original_firstorder_10Percentile",
+            "original_firstorder_90Percentile",
           ]
 chosen2 = [
             'original_glrlm_RunEntropy',
@@ -32,20 +34,34 @@ chosen2 = [
             'original_glrlm_GrayLevelVariance',
             'original_glrlm_LongRunHighGrayLevelEmphasis',
             'original_glrlm_LongRunLowGrayLevelEmphasis',
-            'original_glrlm_RunLengthNonUniformity',
+            'original_glrlm_RunLengthNonUniformity'
           ]
-data = pd.read_csv(path, ";")
-# visualize SEABORN
+bestwls = [
+            'original_glrlm_RunEntropy',
+            'original_glrlm_RunLengthNonUniformity',
+            "diagnostics_Image-original_Mean",
+            "original_firstorder_90Percentile",
+          ]
 
+data = pd.read_csv(path, ";")
+# крутая штука показывает важность многих фич на 2д картинке
+'''
+choice = chosen2
+choice.append('isnorm')
+from pandas.plotting import radviz
+plt.figure()
+radviz(data[choice], 'isnorm', color=['blue','red'])
+plt.show()
+'''
+
+# visualize SEABORN
+'''
 red_blue = ["#ff0000", "#1240ab"]
 sns.pairplot(
     data,
-    vars=[
-          "original_glrlm_LongRunHighGrayLevelEmphasis",
-          "original_glrlm_RunLengthNonUniformity"
-    ],
+    vars=bestwls,
     #hue='data_source', 'isnorm'
-    hue='isnorm',
+    hue='iswls',
     aspect=0.3,
     palette=red_blue,
     #kind="skatter"
@@ -53,24 +69,30 @@ sns.pairplot(
 )
 plt.show()
 plt.tight_layout()
-
-
 '''
+
+
 # download train and test data
+
 test_path = "data/result/test.csv"
 test = pd.read_csv(test_path, ";")
 train_path = "data/result/train.csv"
 train = pd.read_csv(train_path, ";")
 
-#X_train = train.iloc[:, 1:train.shape[1] - 7]
-X_train = train[chosen1]
-y_train = train["isnorm"]
-#X_test = test.iloc  [:, 1:train.shape[1] - 7]
-X_test = test[chosen1]
-y_test = test["isnorm"]
-'''
+X_train = train.iloc[:, 1:train.shape[1] - 7]
+#X_train = train[bestwls]
+y_train = train["isauh"]
+X_test = test.iloc  [:, 1:train.shape[1] - 7]
+#X_test = test[bestwls]
+y_test = test["isauh"]
 
-
+all = ["norm", "auh", "hpb", "hpc", "wls"]
+wls = ['notwls','wls']
+hpb = ['notHPB','HPB']
+hpc = ['notHPC','HPC']
+auh = ['notAuh','auh']
+norma = ['patho','norma']
+current = y_test.name
 
 
 # Make Multinomial Logistic Regression (Logit) and test it
@@ -80,29 +102,32 @@ clf = linear_model.LogisticRegression(max_iter=10000, C=1e5, solver='lbfgs',mult
 clf.fit(X_train, y_train)
 # Test the classifier
 y_pred = clf.predict(X_test)
-print("Accuracy:%.2f%%" % float(accuracy_score(y_test, y_pred))*100)
+print("Accuracy:%.2f%%" % (float(accuracy_score(y_test, y_pred))*100))
 print("Prediction:\n",y_pred)
 print("Real test:\n",y_test.to_numpy())
+print(classification_report(y_test, y_pred, target_names=wls))
 '''
 
 
 # XGBoost
-'''
-print("\nXGBoost Classification:\n===================")
+
+print("\nXGBoost Classification:\n===================\nPredictable attribute: ",current)
 # fit model on all training data
 model = XGBClassifier()
 model.fit(X_train, y_train)
 
 # make predictions for test data and evaluate
 y_pred = model.predict(X_test)
-predictions = [round(value) for value in y_pred]
-accuracy = accuracy_score(y_test, predictions)
-print("Accuracy: %.4f%%%%" % (accuracy * 100.0))
+accuracy = accuracy_score(y_test, y_pred)
+
+#print("Accuracy: %.2f%%" % (accuracy * 100.0))
+#print("Prediction:\n",y_pred)
+#print("Real data:\n",y_test.to_numpy())
 
 # Fit model using each importance as a threshold
 thresholds = np.sort(model.feature_importances_)
-#print("%.2f%", thresholds)
-'''
+#print("thresholds:", thresholds)
+
 
 # cycle
 '''
@@ -121,9 +146,10 @@ for thresh in thresholds:
     print("Thresh=%.3f, n=%d, Accuracy: %.2f%%" % (thresh, select_X_train.shape[1], accuracy*100.0))
 '''
 # hand-made threshold
-'''
+
 # select features using threshold
-selection = SelectFromModel(model, threshold=0.06, prefit=True)
+threshold = 0.07
+selection = SelectFromModel(model, threshold=threshold, prefit=True)
 select_X_train = selection.transform(X_train)
 # train model
 selection_model = XGBClassifier()
@@ -131,7 +157,8 @@ selection_model.fit(select_X_train, y_train)
 # eval model
 select_X_test = selection.transform(X_test)
 y_pred = selection_model.predict(select_X_test)
-predictions = [round(value) for value in y_pred]
-accuracy = accuracy_score(y_test, predictions)
-print("Thresh=%.3f, n=%d, Accuracy: %.2f%%" % (0.06, select_X_train.shape[1], accuracy*100.0))
-'''
+accuracy = accuracy_score(y_test, y_pred)
+print("Thresh=%.3f, n=%d, Accuracy: %.2f%%" % (threshold, select_X_train.shape[1], accuracy*100.0))
+
+print("Prediction:\n",y_pred)
+print("Real data:\n",y_test.to_numpy())
