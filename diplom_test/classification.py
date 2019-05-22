@@ -13,6 +13,9 @@ from sklearn import linear_model
 from sklearn.metrics import accuracy_score, classification_report
 from xgboost import XGBClassifier, plot_importance
 
+import warnings
+warnings.filterwarnings("ignore")
+
 path = "data/result/features.csv"
 chosen = ["original_glrlm_RunEntropy",
           "original_glrlm_GrayLevelNonUniformity",
@@ -73,7 +76,6 @@ plt.tight_layout()
 
 
 # download train and test data
-
 test_path = "data/result/test.csv"
 test = pd.read_csv(test_path, ";")
 train_path = "data/result/train.csv"
@@ -81,10 +83,10 @@ train = pd.read_csv(train_path, ";")
 
 X_train = train.iloc[:, 1:train.shape[1] - 7]
 #X_train = train[bestwls]
-y_train = train["isauh"]
+y_train = train["isnorm"]
 X_test = test.iloc  [:, 1:train.shape[1] - 7]
 #X_test = test[bestwls]
-y_test = test["isauh"]
+y_test = test["isnorm"]
 
 all = ["norm", "auh", "hpb", "hpc", "wls"]
 wls = ['notwls','wls']
@@ -96,21 +98,59 @@ current = y_test.name
 
 
 # Make Multinomial Logistic Regression (Logit) and test it
-'''
-print("\nMultinomial Logistic Regression:\n===================")
-clf = linear_model.LogisticRegression(max_iter=10000, C=1e5, solver='lbfgs',multi_class='multinomial')
+
+print("\nMultinomial Logistic Regression:\n===================\nPredictable attribute: ",current)
+clf = linear_model.LogisticRegression(max_iter=10000, C=1e5, solver='lbfgs')#,multi_class='multinomial')
 clf.fit(X_train, y_train)
 # Test the classifier
 y_pred = clf.predict(X_test)
 print("Accuracy:%.2f%%" % (float(accuracy_score(y_test, y_pred))*100))
 print("Prediction:\n",y_pred)
 print("Real test:\n",y_test.to_numpy())
-print(classification_report(y_test, y_pred, target_names=wls))
+print(classification_report(y_test, y_pred, target_names=norma))
+
+# choose best features and show new model
+'''
+# calculate the features importance
+coefs,number,arr = list(),list(),list()
+for i in range(len(clf.coef_[0])):
+    a = float(np.std(X_train, 0)[i] * clf.coef_[0][i])
+    b = (a, i)
+    coefs.append(b)
+dtype = [('coef',float), ('number',int)]
+arr = np.sort(np.array(coefs, dtype=dtype), order='coef', kind='mergesort')[::-1]
+# choose most important features
+best = list()
+modelSize = 5
+for i in range (modelSize):
+    best.append(X_test.columns[arr[i][1]])
+
+# recalculate model
+X_train = X_train[best]
+X_test = X_test[best]
+print("OPTIMIZED MODEL:\n")
+print(X_test)
+print(X_train)
+clf = linear_model.LogisticRegression(max_iter=10000, C=1e5, solver='lbfgs')#,multi_class='multinomial')
+clf.fit(X_train, y_train)
+# Test the classifier
+y_pred = clf.predict(X_test)
+print("Accuracy:%.2f%%" % (float(accuracy_score(y_test, y_pred))*100))
+print("Prediction:\n",y_pred)
+print("Real test:\n",y_test.to_numpy())
+print(classification_report(y_test, y_pred, target_names=norma))
 '''
 
 
-# XGBoost
 
+
+
+
+
+
+
+# XGBoost
+'''
 print("\nXGBoost Classification:\n===================\nPredictable attribute: ",current)
 # fit model on all training data
 model = XGBClassifier()
@@ -127,7 +167,7 @@ accuracy = accuracy_score(y_test, y_pred)
 # Fit model using each importance as a threshold
 thresholds = np.sort(model.feature_importances_)
 #print("thresholds:", thresholds)
-
+'''
 
 # cycle
 '''
@@ -146,9 +186,9 @@ for thresh in thresholds:
     print("Thresh=%.3f, n=%d, Accuracy: %.2f%%" % (thresh, select_X_train.shape[1], accuracy*100.0))
 '''
 # hand-made threshold
-
+'''
 # select features using threshold
-threshold = 0.07
+threshold = 0.06
 selection = SelectFromModel(model, threshold=threshold, prefit=True)
 select_X_train = selection.transform(X_train)
 # train model
@@ -162,3 +202,4 @@ print("Thresh=%.3f, n=%d, Accuracy: %.2f%%" % (threshold, select_X_train.shape[1
 
 print("Prediction:\n",y_pred)
 print("Real data:\n",y_test.to_numpy())
+'''
