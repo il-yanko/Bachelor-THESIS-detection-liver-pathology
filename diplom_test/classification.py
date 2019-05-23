@@ -7,49 +7,69 @@ import seaborn as sns
 sns.set(style="white")
 sns.set(style="whitegrid", color_codes=True)
 #from sklearn.ensemble import RandomForestClassfier
-from sklearn.feature_selection import SelectFromModel
+from sklearn.feature_selection import SelectFromModel #,RFE
 from sklearn.model_selection import train_test_split
-from sklearn import linear_model
 from sklearn.metrics import accuracy_score, classification_report
+from sklearn import linear_model
 from xgboost import XGBClassifier, plot_importance
 
 import warnings
 warnings.filterwarnings("ignore")
 
 path = "data/result/features.csv"
-chosen = ["original_glrlm_RunEntropy",
-          "original_glrlm_GrayLevelNonUniformity",
-          "original_firstorder_10Percentile",
-          "original_gldm_GrayLevelNonUniformity",
-          "diagnostics_Image-original_Mean"
-          ]
-
-chosen1 = [
-            "diagnostics_Image-original_Mean",
-            "diagnostics_Image-original_Minimum",
-            "diagnostics_Image-original_Maximum",
+bestnorm = [
+            "original_glrlm_RunEntropy",
+            "original_glrlm_GrayLevelNonUniformity",
             "original_firstorder_10Percentile",
-            "original_firstorder_90Percentile",
-          ]
-chosen2 = [
-            'original_glrlm_RunEntropy',
-            'original_glrlm_GrayLevelNonUniformity',
-            'original_glrlm_GrayLevelVariance',
-            'original_glrlm_LongRunHighGrayLevelEmphasis',
-            'original_glrlm_LongRunLowGrayLevelEmphasis',
-            'original_glrlm_RunLengthNonUniformity'
-          ]
+            #"original_gldm_GrayLevelNonUniformity",
+            #"diagnostics_Image-original_Mean"
+           ]
 bestwls = [
             'original_glrlm_RunEntropy',
-            'original_glrlm_RunLengthNonUniformity',
-            "diagnostics_Image-original_Mean",
+            #'original_glrlm_RunLengthNonUniformity',
+            #"diagnostics_Image-original_Mean",
             "original_firstorder_90Percentile",
+          ]
+besthpc = [
+            #"diagnostics_Image-original_Mean",
+            #"diagnostics_Image-original_Minimum",
+            #"diagnostics_Image-original_Maximum",
+            #"original_firstorder_10Percentile",
+            #"original_firstorder_90Percentile",
+            #"original_gldm_GrayLevelNonUniformity",
+            "original_glcm_ClusterShade",
+            "original_firstorder_RobustMeanAbsoluteDeviation",
+            #"original_firstorder_TotalEnergy",
+            "original_glrlm_RunEntropy",
+            #"original_gldm_DependenceNonUniformity",
+            #"original_glrlm_LongRunHighGrayLevelEmphasis",
+            "original_gldm_LargeDependenceEmphasis"
+          ]
+besthpb = [
+            "original_gldm_DependenceVariance",
+            #"diagnostics_Image-original_Mean",
+            "original_glcm_ClusterShade",
+            #"original_gldm_LargeDependenceLowGrayLevelEmphasis",
+            "original_glcm_Idmn",
+            "original_firstorder_Skewness",
+            "original_ngtdm_Strength",
+            #"original_gldm_DependenceNonUniformity",
+            #"original_firstorder_Kurtosis",
+            #"original_firstorder_Energy",
+            #"original_glrlm_GrayLevelNonUniformity",
+]
+bestauh = [
+            'original_firstorder_TotalEnergy',
+            'original_firstorder_Energy',
+            'original_glcm_ClusterProminence',
+            'original_glcm_Imc1'
           ]
 
 data = pd.read_csv(path, ";")
-# крутая штука показывает важность многих фич на 2д картинке
+# radviz (Dimensional Anchor)
 '''
-choice = chosen2
+# крутая штука показывает важность многих фич на 2д картинке
+choice = bestnorm
 choice.append('isnorm')
 from pandas.plotting import radviz
 plt.figure()
@@ -57,14 +77,14 @@ radviz(data[choice], 'isnorm', color=['blue','red'])
 plt.show()
 '''
 
-# visualize SEABORN
+# seaborn
 '''
 red_blue = ["#ff0000", "#1240ab"]
 sns.pairplot(
     data,
-    vars=bestwls,
+    vars=besthpb,
     #hue='data_source', 'isnorm'
-    hue='iswls',
+    hue='ishpb',
     aspect=0.3,
     palette=red_blue,
     #kind="skatter"
@@ -81,19 +101,25 @@ test = pd.read_csv(test_path, ";")
 train_path = "data/result/train.csv"
 train = pd.read_csv(train_path, ";")
 
-X_train = train.iloc[:, 1:train.shape[1] - 7]
-#X_train = train[bestwls]
-y_train = train["isnorm"]
-X_test = test.iloc  [:, 1:train.shape[1] - 7]
-#X_test = test[bestwls]
-y_test = test["isnorm"]
-
 all = ["norm", "auh", "hpb", "hpc", "wls"]
 wls = ['notwls','wls']
 hpb = ['notHPB','HPB']
 hpc = ['notHPC','HPC']
 auh = ['notAuh','auh']
 norma = ['patho','norma']
+
+model_class_parameter = "iswls"
+model_names = wls
+model_features = bestwls
+
+#X_train = train.iloc[:, 1:train.shape[1] - 7]
+X_train = train[model_features]
+y_train = train[model_class_parameter]
+
+#X_test = test.iloc  [:, 1:train.shape[1] - 7]
+X_test = test[model_features]
+y_test = test[model_class_parameter]
+
 current = y_test.name
 
 
@@ -107,12 +133,17 @@ y_pred = clf.predict(X_test)
 print("Accuracy:%.2f%%" % (float(accuracy_score(y_test, y_pred))*100))
 print("Prediction:\n",y_pred)
 print("Real test:\n",y_test.to_numpy())
-print(classification_report(y_test, y_pred, target_names=norma))
+print(classification_report(y_test, y_pred, target_names=model_names))
+
+print("MODEL:")
+for i in range(len(model_features)):
+    print(model_features[i],clf.coef_[0][i])
+
 
 # choose best features and show new model
 '''
 # calculate the features importance
-coefs,number,arr = list(),list(),list()
+coefs,arr = list(),list()
 for i in range(len(clf.coef_[0])):
     a = float(np.std(X_train, 0)[i] * clf.coef_[0][i])
     b = (a, i)
@@ -121,32 +152,25 @@ dtype = [('coef',float), ('number',int)]
 arr = np.sort(np.array(coefs, dtype=dtype), order='coef', kind='mergesort')[::-1]
 # choose most important features
 best = list()
-modelSize = 5
+modelSize = 7
 for i in range (modelSize):
     best.append(X_test.columns[arr[i][1]])
+
 
 # recalculate model
 X_train = X_train[best]
 X_test = X_test[best]
 print("OPTIMIZED MODEL:\n")
-print(X_test)
-print(X_train)
-clf = linear_model.LogisticRegression(max_iter=10000, C=1e5, solver='lbfgs')#,multi_class='multinomial')
-clf.fit(X_train, y_train)
+print('best=',best)
+clf1 = linear_model.LogisticRegression(max_iter=10000, C=1e5, solver='lbfgs')#,multi_class='multinomial')
+clf1.fit(X_train, y_train)
 # Test the classifier
-y_pred = clf.predict(X_test)
+y_pred = clf1.predict(X_test)
 print("Accuracy:%.2f%%" % (float(accuracy_score(y_test, y_pred))*100))
 print("Prediction:\n",y_pred)
 print("Real test:\n",y_test.to_numpy())
-print(classification_report(y_test, y_pred, target_names=norma))
+print(classification_report(y_test, y_pred, target_names=model_names))
 '''
-
-
-
-
-
-
-
 
 
 # XGBoost
@@ -155,14 +179,16 @@ print("\nXGBoost Classification:\n===================\nPredictable attribute: ",
 # fit model on all training data
 model = XGBClassifier()
 model.fit(X_train, y_train)
+plot_importance(model)
+plt.show()
 
 # make predictions for test data and evaluate
 y_pred = model.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
 
-#print("Accuracy: %.2f%%" % (accuracy * 100.0))
-#print("Prediction:\n",y_pred)
-#print("Real data:\n",y_test.to_numpy())
+print("Accuracy: %.2f%%" % (accuracy * 100.0))
+print("Prediction:\n",y_pred)
+print("Real data:\n",y_test.to_numpy())
 
 # Fit model using each importance as a threshold
 thresholds = np.sort(model.feature_importances_)
@@ -185,6 +211,7 @@ for thresh in thresholds:
     accuracy = accuracy_score(y_test, predictions)
     print("Thresh=%.3f, n=%d, Accuracy: %.2f%%" % (thresh, select_X_train.shape[1], accuracy*100.0))
 '''
+
 # hand-made threshold
 '''
 # select features using threshold
