@@ -6,15 +6,77 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set(style="white")
 sns.set(style="whitegrid", color_codes=True)
-#from sklearn.ensemble import RandomForestClassfier
-from sklearn.feature_selection import SelectFromModel #,RFE
+
+from sklearn.decomposition import PCA
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.feature_selection import SelectFromModel
+from sklearn import linear_model,tree
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report
-from sklearn import linear_model
-from xgboost import XGBClassifier, plot_importance
+from sklearn.pipeline import make_pipeline
+from sklearn import svm
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.preprocessing import StandardScaler
+from sklearn.utils.multiclass import unique_labels
+
+from boruta import BorutaPy
 
 import warnings
 warnings.filterwarnings("ignore")
+
+def plot_confusion_matrix(y_true, y_pred, classes,
+                          normalize=False, title=None,
+                          cmap=plt.cm.get_cmap('Reds')):
+    """
+    This function prints and plots the confusion matrix.
+    Normalization can be applied by setting `normalize=True`.
+    """
+    if not title:
+        if normalize:
+            title = "NORMALIZED CONFUSION MATRIX"
+        else:
+            title = "NON-NORMALIZED CONFUSION MATRIX"
+
+    # Compute confusion matrix
+    cm = confusion_matrix(y_true, y_pred)
+    # Only use the labels that appear in the data
+    #classes = classes[unique_labels(y_true, y_pred)]
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        print("NORMALIZED CONFUSION MATRIX")
+    else:
+        print("NON-NORMALIZED CONFUSION MATRIX")
+
+    print(cm)
+
+    fig, ax = plt.subplots()
+    im = ax.imshow(cm, interpolation='nearest', cmap=cmap)
+    ax.figure.colorbar(im, ax=ax)
+    # We want to show all ticks...
+    ax.set(xticks=np.arange(cm.shape[1]),
+           yticks=np.arange(cm.shape[0]),
+           # ... and label them with the respective list entries
+           xticklabels=classes, yticklabels=classes,
+           ylabel='TRUE CLASS',
+           xlabel='PREDICTED CLASS'
+           )
+    ax.set_title(title, fontsize=22)
+
+    # Rotate the tick labels and set their alignment.
+    #plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+    #         rotation_mode="anchor")
+
+    # Loop over data dimensions and create text annotations.
+    fmt = '.2f' if normalize else 'd'
+    thresh = cm.max() / 2.
+    for i in range(cm.shape[0]):
+        for j in range(cm.shape[1]):
+            ax.text(j, i, format(cm[i, j], fmt),
+                    ha="center", va="center", fontsize=20,
+                    color="white" if cm[i, j] > thresh else "black")
+            ax.tick_params(labelsize=20)
+    fig.tight_layout()
+    return ax
 
 path = "data/result/features.csv"
 bestnorm = [
@@ -66,6 +128,8 @@ bestauh = [
           ]
 
 data = pd.read_csv(path, ";")
+
+
 # radviz (Dimensional Anchor)
 '''
 # крутая штука показывает важность многих фич на 2д картинке
@@ -94,7 +158,7 @@ plt.show()
 plt.tight_layout()
 '''
 
-
+#====================================================================
 # download train and test data
 test_path = "data/result/test.csv"
 test = pd.read_csv(test_path, ";")
@@ -108,40 +172,97 @@ hpc = ['notHPC','HPC']
 auh = ['notAuh','auh']
 norma = ['patho','norma']
 
-model_class_parameter = "iswls"
-model_names = wls
-model_features = bestwls
+#"diagnosis_code"
+model_class_parameter = "diagnosis_code"
+model_names = all
+cols_to_drop = ['id','data_source','diagnosis_code','isnorm','isauh','ishpb','ishpc','iswls']
+#model_features = bestnorm
+model_features = [col for col in train.columns if col not in cols_to_drop]
 
 #X_train = train.iloc[:, 1:train.shape[1] - 7]
 X_train = train[model_features]
-y_train = train[model_class_parameter]
+y_train = train[model_class_parameter].astype(int)
 
 #X_test = test.iloc  [:, 1:train.shape[1] - 7]
 X_test = test[model_features]
-y_test = test[model_class_parameter]
+y_test = test[model_class_parameter].astype(int)
 
 current = y_test.name
+#====================================================================
+
+def predict_and_show(X_train, y_train, X_test, y_test, clf, plt, names, clf_name):
+    print("\n", clf_name, ":\n===================================\nPredictable attribute: ", current)
+    clf.fit(X_train, y_train)
+    # Test the classifier
+    y_pred = clf.predict(X_test)
+    print("Accuracy:%.2f%%" % (float(accuracy_score(y_test, y_pred)) * 100))
+    print("Prediction:\n", y_pred)
+    print("Real test:\n", y_test.to_numpy())
+    print(classification_report(y_test, y_pred, target_names=names))
+    # Plot normalized confusion matrix
+    # if you need numbers: classes=np.asarray(unique_labels(y_test), dtype=int)
+    plot_confusion_matrix(y_test, y_pred, classes=names, normalize=True, title=clf_name)
 
 
-# Make Multinomial Logistic Regression (Logit) and test it
 
-print("\nMultinomial Logistic Regression:\n===================\nPredictable attribute: ",current)
-clf = linear_model.LogisticRegression(max_iter=10000, C=1e5, solver='lbfgs')#,multi_class='multinomial')
-clf.fit(X_train, y_train)
-# Test the classifier
-y_pred = clf.predict(X_test)
-print("Accuracy:%.2f%%" % (float(accuracy_score(y_test, y_pred))*100))
-print("Prediction:\n",y_pred)
-print("Real test:\n",y_test.to_numpy())
-print(classification_report(y_test, y_pred, target_names=model_names))
 
+
+
+    plt.show()
+
+clf_names,clf_models  = list(), list()
+
+clf_models.append(make_pipeline (PCA(n_components=3), StandardScaler(),
+                                 tree.DecisionTreeClassifier(random_state=0)))
+clf_names.append("Decision Tree Classifier")
+
+'''
+clf_models.append(make_pipeline (PCA(n_components=5), StandardScaler(),
+                                 linear_model.LogisticRegression(max_iter=10000, C=1e5,
+                                                     solver='lbfgs',
+                                                     multi_class='multinomial')))
+clf_names.append("Multinomial Logistic Regression (Multi-Logit)")
+
+
+clf_models.append(make_pipeline (PCA(n_components=3),  #StandardScaler(),
+                                 svm.SVC(gamma='scale', kernel='rbf')))
+clf_names.append("C-Support Vector Machine")
+
+clf_models.append(make_pipeline (PCA(n_components=3), StandardScaler(),
+                                 RandomForestClassifier(max_depth=10, n_estimators=100,
+                                            max_features=3, random_state=0,
+                                            criterion='gini',bootstrap=False)))
+clf_names.append("Random Forest Classifier")
+
+clf_models.append(make_pipeline (PCA(n_components=3), StandardScaler(),
+                                 GradientBoostingClassifier(n_estimators=10, learning_rate=1.0,
+                                                max_depth=5, random_state=0)))
+clf_names.append("Gradient Boosting")
+
+clf_models.append(make_pipeline (PCA(n_components=1), StandardScaler(),
+                                 KNeighborsClassifier(5)))
+clf_names.append("k-Nearest Neighbors")
+'''
+clfs={clf_names[a]:clf_models[a] for a in range(len(clf_names))}
+for name,model in clfs.items():
+    predict_and_show(X_train, y_train, X_test, y_test, model, plt, model_names, name)
+
+
+
+
+
+
+
+
+
+
+# Multi-Logit: choose best features and show new model
+'''
+clf = make_pipeline (PCA(n_components=5),StandardScaler(),
+                     linear_model.LogisticRegression(max_iter=10000, C=1e5, solver='lbfgs',multi_class='multinomial'))
 print("MODEL:")
 for i in range(len(model_features)):
     print(model_features[i],clf.coef_[0][i])
-
-
-# choose best features and show new model
-'''
 # calculate the features importance
 coefs,arr = list(),list()
 for i in range(len(clf.coef_[0])):
@@ -172,9 +293,9 @@ print("Real test:\n",y_test.to_numpy())
 print(classification_report(y_test, y_pred, target_names=model_names))
 '''
 
-
 # XGBoost
 '''
+from xgboost import XGBClassifier, plot_importance
 print("\nXGBoost Classification:\n===================\nPredictable attribute: ",current)
 # fit model on all training data
 model = XGBClassifier()
@@ -193,10 +314,9 @@ print("Real data:\n",y_test.to_numpy())
 # Fit model using each importance as a threshold
 thresholds = np.sort(model.feature_importances_)
 #print("thresholds:", thresholds)
-'''
 
-# cycle
-'''
+# XGB: cycle
+
 for thresh in thresholds:
     # select features using threshold
     selection = SelectFromModel(model, threshold=thresh, prefit=True)
@@ -210,10 +330,9 @@ for thresh in thresholds:
     predictions = [round(value) for value in y_pred]
     accuracy = accuracy_score(y_test, predictions)
     print("Thresh=%.3f, n=%d, Accuracy: %.2f%%" % (thresh, select_X_train.shape[1], accuracy*100.0))
-'''
 
-# hand-made threshold
-'''
+# XGB: hand-made threshold
+
 # select features using threshold
 threshold = 0.06
 selection = SelectFromModel(model, threshold=threshold, prefit=True)
