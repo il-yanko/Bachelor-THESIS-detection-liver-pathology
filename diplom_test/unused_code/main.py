@@ -1,15 +1,9 @@
 # outer dependencies:
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-import matplotlib.patches as mpatches
 import os.path
-import time
 
 # inner dependencies:
-from glcm import GLCM, calculate_save_glcm
-from data_reader import ImgReader, DataReader, rgb_to_gray
-import processing as proc
+from data_reader import DataReader
+
 
 #=========================================
 
