@@ -1,39 +1,15 @@
 #!/usr/bin/env python
 
-from radiomics import featureextractor  # This module is used for interaction with pyradiomics
-import numpy as np
+# This module is used for work data uploading and processing
 import pandas as pd
-import os.path
-import cv2
-import nrrd
+import numpy as np
 from data_reader import ImgReader
-
-
-class Pathology:
-    def __init__(self, data=None, p_name=None):
-        self._data = data
-        if isinstance(p_name, str):
-            self._name = p_name
-        else:
-            raise Exception("name is not a string")
-
-    def get_name(self):
-        return self._name
-
-    def get_data(self):
-        return self._data
-
-    def set_name(self, cur_name):
-        self._name = cur_name
-
-    def set_data(self, cur_data):
-        self._name = cur_data
-
-
-# convert RGB -> grayscale
-def rgb_to_gray(rgb):
-    # scalar product of colors with certain theoretical coefficients according to the YUV system
-    return np.dot(rgb[..., :3], [0.299, 0.587, 0.114]).round(3).astype(int)
+# This module is used for access to files in the system
+import os.path
+# This module is used for converting from PNG to NRRD needed for radiomics
+import nrrd
+# This module is used for interaction with pyradiomics
+from radiomics import featureextractor
 
 
 # Create target directory if don't exist
@@ -46,7 +22,7 @@ def create_directory(directory):
 
 
 sl = "/"
-folderNames = ["norm","auh",  "hpb", "hpc", "wls"]
+folderNames = ["norm", "auh", "hpb", "hpc", "wls"]
 # add "dsh" to add dysholia (almost like a norm)
 folderNumber = len(folderNames)
 
@@ -110,12 +86,8 @@ nrrd.write(image_path_to, image)
 nrrd.write(label_path_to, label)
 '''
 
-
 data_array = list()
 # Declare the source of NRRD data
-
-
-
 
 for i in range(folderNumber):
     # folderNumber
@@ -129,7 +101,6 @@ for i in range(folderNumber):
         name_label = folderNames[i] + "_label_" + str(j) + ".nrrd"
         image_path_to = path + name_image
         label_path_to = path + name_label
-    #print(fileNumber, "files were found")
 
         # Instantiate the extractor
         extractor = featureextractor.RadiomicsFeaturesExtractor()
@@ -157,8 +128,6 @@ for i in range(folderNumber):
                 result[column] = 0
         data_array.append(result)
 
-
-df =  pd.DataFrame(data_array)
 toBeDeleted = ['diagnostics_Versions_PyRadiomics', 'diagnostics_Versions_Numpy',
                'diagnostics_Versions_SimpleITK', 'diagnostics_Versions_PyWavelet',
                'diagnostics_Versions_Python','diagnostics_Configuration_Settings',
@@ -168,5 +137,9 @@ toBeDeleted = ['diagnostics_Versions_PyRadiomics', 'diagnostics_Versions_Numpy',
                'diagnostics_Mask-original_Size', 'diagnostics_Mask-original_BoundingBox',
                'diagnostics_Mask-original_VoxelNum', 'diagnostics_Mask-original_VolumeNum',
                'diagnostics_Mask-original_CenterOfMassIndex','diagnostics_Mask-original_CenterOfMass']
-df = df.drop(toBeDeleted, axis=1)
+for index in range (len(data_array)):
+    for feature in range(len(toBeDeleted)):
+        del(data_array[index][toBeDeleted[feature]])
+df =  pd.DataFrame(data_array)
+
 df.to_csv(os.getcwd() + '/data/result/' + 'features.csv', sep=";",float_format=None)

@@ -18,8 +18,9 @@ from sklearn import svm
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.utils.multiclass import unique_labels
+import pickle
 
-from boruta import BorutaPy
+#from boruta import BorutaPy
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -147,7 +148,6 @@ red_blue = ["#ff0000", "#1240ab"]
 sns.pairplot(
     data,
     vars=besthpb,
-    #hue='data_source', 'isnorm'
     hue='ishpb',
     aspect=0.3,
     palette=red_blue,
@@ -173,8 +173,8 @@ auh = ['notAuh','auh']
 norma = ['patho','norma']
 
 #"diagnosis_code"
-model_class_parameter = "diagnosis_code"
-model_names = all
+model_class_parameter = "iswls"
+model_names = wls
 cols_to_drop = ['id','data_source','diagnosis_code','isnorm','isauh','ishpb','ishpc','iswls']
 #model_features = bestnorm
 model_features = [col for col in train.columns if col not in cols_to_drop]
@@ -191,7 +191,7 @@ current = y_test.name
 #====================================================================
 
 def predict_and_show(X_train, y_train, X_test, y_test, clf, plt, names, clf_name):
-    print("\n", clf_name, ":\n===================================\nPredictable attribute: ", current)
+    print("\n", clf_name, ":\n================================================\nPredictable attribute: ", current)
     clf.fit(X_train, y_train)
     # Test the classifier
     y_pred = clf.predict(X_test)
@@ -202,62 +202,62 @@ def predict_and_show(X_train, y_train, X_test, y_test, clf, plt, names, clf_name
     # Plot normalized confusion matrix
     # if you need numbers: classes=np.asarray(unique_labels(y_test), dtype=int)
     plot_confusion_matrix(y_test, y_pred, classes=names, normalize=True, title=clf_name)
-
-
-
-
-
-
     plt.show()
 
 clf_names,clf_models  = list(), list()
-
-clf_models.append(make_pipeline (PCA(n_components=3), StandardScaler(),
-                                 tree.DecisionTreeClassifier(random_state=0)))
-clf_names.append("Decision Tree Classifier")
-
 '''
-clf_models.append(make_pipeline (PCA(n_components=5), StandardScaler(),
-                                 linear_model.LogisticRegression(max_iter=10000, C=1e5,
-                                                     solver='lbfgs',
-                                                     multi_class='multinomial')))
-clf_names.append("Multinomial Logistic Regression (Multi-Logit)")
-
-
-clf_models.append(make_pipeline (PCA(n_components=3),  #StandardScaler(),
+clf_models.append(make_pipeline (PCA(n_components=2), StandardScaler(),
+                                 tree.DecisionTreeClassifier(random_state=0,criterion='gini')))
+clf_names.append("Decision Tree Classifier + PCA (%i components)" % 2)
+'''
+clf_models.append(make_pipeline (PCA(n_components=3), #StandardScaler(),
+                                 linear_model.LogisticRegression(max_iter=100000, C=1e3,
+                                                     solver='lbfgs'
+                                                     ,multi_class='multinomial'
+                                                                 )))
+clf_names.append("Logistic Regression + PCA (%i components)" % 3)
+'''
+clf_models.append(make_pipeline (PCA(n_components=3), #StandardScaler(),
                                  svm.SVC(gamma='scale', kernel='rbf')))
-clf_names.append("C-Support Vector Machine")
+clf_names.append("C-Support Vector Machine + PCA (%i components)" % 3)
 
-clf_models.append(make_pipeline (PCA(n_components=3), StandardScaler(),
+clf_models.append(make_pipeline (PCA(n_components=5), StandardScaler(),
                                  RandomForestClassifier(max_depth=10, n_estimators=100,
-                                            max_features=3, random_state=0,
+                                            max_features=2, random_state=0,
                                             criterion='gini',bootstrap=False)))
-clf_names.append("Random Forest Classifier")
+clf_names.append("Random Forest Classifier + PCA (%i components)" % 5)
+
+clf_models.append(make_pipeline (PCA(n_components=3), #StandardScaler(),
+                                 GradientBoostingClassifier(n_estimators=100, learning_rate=1.0,
+                                                max_depth=8, random_state=0)))
+clf_names.append("Gradient Boosting + PCA (%i components)" % 3)
 
 clf_models.append(make_pipeline (PCA(n_components=3), StandardScaler(),
-                                 GradientBoostingClassifier(n_estimators=10, learning_rate=1.0,
-                                                max_depth=5, random_state=0)))
-clf_names.append("Gradient Boosting")
-
-clf_models.append(make_pipeline (PCA(n_components=1), StandardScaler(),
                                  KNeighborsClassifier(5)))
-clf_names.append("k-Nearest Neighbors")
+clf_names.append("k-Nearest Neighbors + PCA (%i components)" % 2)
 '''
-clfs={clf_names[a]:clf_models[a] for a in range(len(clf_names))}
+
+
+clfs = {clf_names[a]:clf_models[a] for a in range(len(clf_names))}
 for name,model in clfs.items():
     predict_and_show(X_train, y_train, X_test, y_test, model, plt, model_names, name)
 
+# prepare 1 (!!!) model for saving
+model = clfs["Logistic Regression + PCA (3 components)"]
+
+# save the model to disk
+filename = 'data/result/model/model.sav'
+file = open(filename, 'wb')
+pickle.dump(model, file)
+print(model)
+file.close()
 
 
 
 
-
-
-
-
-
-# Multi-Logit: choose best features and show new model
+# Different additional unused code
 '''
+# Multi-Logit: choose best features and show new model
 clf = make_pipeline (PCA(n_components=5),StandardScaler(),
                      linear_model.LogisticRegression(max_iter=10000, C=1e5, solver='lbfgs',multi_class='multinomial'))
 print("MODEL:")
@@ -276,8 +276,6 @@ best = list()
 modelSize = 7
 for i in range (modelSize):
     best.append(X_test.columns[arr[i][1]])
-
-
 # recalculate model
 X_train = X_train[best]
 X_test = X_test[best]
@@ -291,10 +289,9 @@ print("Accuracy:%.2f%%" % (float(accuracy_score(y_test, y_pred))*100))
 print("Prediction:\n",y_pred)
 print("Real test:\n",y_test.to_numpy())
 print(classification_report(y_test, y_pred, target_names=model_names))
-'''
+
 
 # XGBoost
-'''
 from xgboost import XGBClassifier, plot_importance
 print("\nXGBoost Classification:\n===================\nPredictable attribute: ",current)
 # fit model on all training data
@@ -316,7 +313,6 @@ thresholds = np.sort(model.feature_importances_)
 #print("thresholds:", thresholds)
 
 # XGB: cycle
-
 for thresh in thresholds:
     # select features using threshold
     selection = SelectFromModel(model, threshold=thresh, prefit=True)
@@ -332,7 +328,6 @@ for thresh in thresholds:
     print("Thresh=%.3f, n=%d, Accuracy: %.2f%%" % (thresh, select_X_train.shape[1], accuracy*100.0))
 
 # XGB: hand-made threshold
-
 # select features using threshold
 threshold = 0.06
 selection = SelectFromModel(model, threshold=threshold, prefit=True)
