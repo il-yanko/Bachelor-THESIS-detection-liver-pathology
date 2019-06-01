@@ -110,6 +110,7 @@ for i in range(folderNumber):
         extractor.enableFeatureClassByName('glrlm')
         extractor.enableFeatureClassByName('ngtdm')
         extractor.enableFeatureClassByName('gldm')
+        extractor.enableFeatureClassByName('glszm')
 
         #print("Extraction parameters:\n\t", extractor.settings)
         #print("Enabled filters:\n\t", extractor._enabledImagetypes)

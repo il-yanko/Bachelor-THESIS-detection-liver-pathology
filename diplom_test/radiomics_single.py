@@ -57,6 +57,8 @@ def signle_predition(path=img_path):
     extractor.enableFeatureClassByName('glrlm')
     extractor.enableFeatureClassByName('ngtdm')
     extractor.enableFeatureClassByName('gldm')
+    extractor.enableFeatureClassByName('glszm')
+
 
     #print("Extraction parameters:\n\t", extractor.settings)
     #print("Enabled filters:\n\t", extractor._enabledImagetypes)
@@ -99,3 +101,5 @@ def signle_predition(path=img_path):
     # Test the classifier
     y_pred = loaded.predict(data)
     print(y_pred)
+
+signle_predition()
