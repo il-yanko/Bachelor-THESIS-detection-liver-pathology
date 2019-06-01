@@ -92,6 +92,7 @@ filename = 'data/result/model/model.sav'
 file = open(filename, 'rb')
 loaded = pickle.load(file)
 #print("\n\n", loaded)
+print("Model was loaded")
 
 # Test the classifier
 y_pred = loaded.predict(data)
