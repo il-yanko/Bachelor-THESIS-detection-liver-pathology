@@ -173,31 +173,18 @@ hpc = ['notHPC','HPC']
 auh = ['notAuh','auh']
 norma = ['patho','norma']
 
-#"diagnosis_code"
-model_class_parameter = "ishpc"
-model_names = hpc
 cols_to_drop = ['id','data_source','diagnosis_code','isnorm','isauh','ishpb','ishpc','iswls']
-#model_features = bestnorm
 model_features = [col for col in train.columns if col not in cols_to_drop]
 
-###############################################
-data = pd.read_csv(path, ";")
-X_all = data[model_features]
-# Draw the full plot
-sns.clustermap(X_all.corr(), center=0, cmap="vlag",
-               linewidths=.75, figsize=(13, 13))
-plt.show()
-###############################################
+# pool of all classification settings
+poolParam = ["diagnosis_code"]#,"iswls","ishpb","ishpc","isauh","isnorm"]
+poolLabel = [all]#, wls, hpb, hpc, auh, norma]
+poolTests = {poolParam[a]:poolLabel[a] for a in range (len(poolParam))}
 
-#X_train = train.iloc[:, 1:train.shape[1] - 7]
-X_train = train[model_features]
-y_train = train[model_class_parameter].astype(int)
+# single classification setting
+#model_parameter = "diagnosis_code"
+#model_labels = all
 
-#X_test = test.iloc  [:, 1:train.shape[1] - 7]
-X_test = test[model_features]
-y_test = test[model_class_parameter].astype(int)
-
-current = y_test.name
 #====================================================================
 
 def predict_and_show(X_train, y_train, X_test, y_test, clf, plt, names, clf_name):
@@ -215,34 +202,33 @@ def predict_and_show(X_train, y_train, X_test, y_test, clf, plt, names, clf_name
     plt.show()
 
 clf_names,clf_models  = list(), list()
-'''
 
-clf_models.append(make_pipeline (PCA(n_components=2), StandardScaler(),
-                                 tree.DecisionTreeClassifier(random_state=0,criterion='gini')))
+
+clf_models.append(make_pipeline (#PCA(n_components=2),
+                                 StandardScaler(),
+                                 tree.DecisionTreeClassifier(random_state=0,criterion='gini',max_features=2)))
 clf_names.append("Decision Tree Classifier")
 
 
-
-clf_models.append(make_pipeline (PCA(n_components=2), #StandardScaler(),
-                                 linear_model.LogisticRegression(max_iter=100000, C=1e3,
-                                                     solver='lbfgs'
-                                                     ,multi_class='multinomial'
+clf_models.append(make_pipeline (PCA(n_components=5), #StandardScaler(),
+                                 linear_model.LogisticRegression(max_iter=1000000, C=1e3,
+                                                     solver='newton-cg',penalty="l2" ,multi_class='multinomial'
                                                                  )))
 clf_names.append("Logistic Regression")
 
-clf_models.append(make_pipeline (PCA(n_components=2), StandardScaler(),
+clf_models.append(make_pipeline (PCA(n_components=5), StandardScaler(),
                                  RandomForestClassifier(max_depth=10, n_estimators=100,
                                             max_features=2, random_state=0,
                                             criterion='gini',bootstrap=False)))
 clf_names.append("Random Forest Classifier")
-'''
 
-'''
+
+
 clf_models.append(make_pipeline (PCA(n_components=3), #StandardScaler(),
                                  svm.SVC(gamma='scale', kernel='rbf')))
 clf_names.append("C-Support Vector Machine")
 
-clf_models.append(make_pipeline (PCA(n_components=3), #StandardScaler(),
+clf_models.append(make_pipeline (PCA(n_components=2), StandardScaler(),
                                  GradientBoostingClassifier(n_estimators=100, learning_rate=1.0,
                                                 max_depth=8, random_state=0)))
 clf_names.append("Gradient Boosting")
@@ -251,26 +237,54 @@ clf_models.append(make_pipeline (PCA(n_components=3), StandardScaler(),
                                  KNeighborsClassifier(5)))
 clf_names.append("k-Nearest Neighbors")
 
+
+
+
 clfs = {clf_names[a]:clf_models[a] for a in range(len(clf_names))}
 for name,model in clfs.items():
-    predict_and_show(X_train, y_train, X_test, y_test, model, plt, model_names, name)
-'''
+    for param, label in poolTests.items():
+
+        # X_train = train.iloc[:, 1:train.shape[1] - 7]
+        X_train = train[model_features]
+        y_train = train[param].astype(int)
+
+        # X_test = test.iloc  [:, 1:train.shape[1] - 7]
+        X_test = test[model_features]
+        y_test = test[param].astype(int)
+
+        current = param
+        predict_and_show(X_train, y_train, X_test, y_test, model, plt, label, name)
+
 
 
 # model saving
-'''
+
 # TODO: save all one-vs-all model's and their accuracies
 #prepare 1 (!!!) model for saving
-name = "Random Forest Classifier"
+'''
+name = "Logistic Regression"
 model = clfs[name]
 
+
 # save the model to disk
-filename = 'data/result/model/model.sav'
+filename = 'data/result/model/'+ name +'.sav'
 file = open(filename, 'wb')
 pickle.dump(model, file)
 print("Model of", name, "was saved")
 file.close()
 '''
+
+
+for name,model in clfs.items():
+    filename = 'data/result/model/'+ name +'.sav'
+    file = open(filename, 'wb')
+    pickle.dump(model, file)
+    print("Model of", name, "was saved")
+    file.close()
+
+
+
+
 
 
 # Different additional unused code
@@ -361,4 +375,14 @@ print("Thresh=%.3f, n=%d, Accuracy: %.2f%%" % (threshold, select_X_train.shape[1
 
 print("Prediction:\n",y_pred)
 print("Real data:\n",y_test.to_numpy())
+'''
+
+# Build correlation between all model features
+'''
+data = pd.read_csv(path, ";")
+X_all = data[model_features]
+# Draw the full plot
+sns.clustermap(X_all.corr(), center=0, cmap="vlag",
+               linewidths=.75, figsize=(13, 13))
+plt.show()
 '''
