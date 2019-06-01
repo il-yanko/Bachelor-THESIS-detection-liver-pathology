@@ -22,10 +22,11 @@ class MatplotlibWidget(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
         loadUi(qtCreatorFile, self)
-        self.path = "Відсутня інформація про файл"
+        self.FlagLoaded = False
         self.setWindowTitle("Дипломна робота студента групи БС-52 Янкового І.О. ")
         self.buttonLoader.clicked.connect(self.choose_file)
-        self.addToolBar(NavigationToolbar(self.MplWidget.canvas, self))
+        self.buttonAnalyze.clicked.connect(self.analyze)
+        #self.addToolBar(NavigationToolbar(self.MplWidget.canvas, self))
         self.setWindowIcon(QtGui.QIcon("logo.png"))
 
         mainMenu = self.menuBar()
@@ -37,6 +38,12 @@ class MatplotlibWidget(QMainWindow):
         buttonLoaderMenu.setStatusTip('Завантажити область інтересу для подальшого аналізу')
         buttonLoaderMenu.triggered.connect(self.choose_file)
         fileMenu.addAction(buttonLoaderMenu)
+
+        buttonAnalyzeMenu = QAction('Аналіз', self)
+        buttonAnalyzeMenu.setShortcut('Ctrl+A')
+        buttonAnalyzeMenu.setStatusTip('Проаналізувати завантажене зображення')
+        buttonAnalyzeMenu.triggered.connect(self.analyze)
+        fileMenu.addAction(buttonAnalyzeMenu)
 
         buttonExit = QAction('Вихід', self)
         buttonExit.setShortcut('Ctrl+Q')
@@ -54,20 +61,25 @@ class MatplotlibWidget(QMainWindow):
         buttonInfo.triggered.connect(self.msgBox.exec_)
         helpMenu.addAction(buttonInfo)
 
-        buttonInfo = QAction('Автори', self)
-        buttonInfo.setShortcut('Ctrl+A')
-        buttonInfo.setStatusTip('Отримати інформацію про автора')
+        buttonInfo = QAction('Розробник', self)
+        buttonInfo.setShortcut('Ctrl+D')
+        buttonInfo.setStatusTip('Отримати інформацію про розробника')
         self.msgBox = QMessageBox(self)
         self.msgBox.setIcon(QMessageBox.Information)
         self.msgBox.setWindowTitle("Додаток")
         self.msgBox.setText("Цей програмний додаток було розроблено студентом 4 курсу Янковим І.О.\n"
                             "\nНТТУ КПІ ім. Ігоря Сікорського:\n"
-                            "Факультет Біомедичної Інженерії (ФБМІ)"
-                            "Академічна одиниця: група БС-52;"
+                            "Факультет Біомедичної Інженерії (ФБМІ)\n"
+                            "Академічна одиниця: група БС-52\n"
                             "Науковий керівник: Настенко Є.А.")
         buttonInfo.triggered.connect(self.msgBox.exec_)
         helpMenu.addAction(buttonInfo)
 
+    def analyze(self):
+        if (self.FlagLoaded):
+            self.labelResult.setText(rs.signle_predition(self.path))
+        else:
+            self.labelResult.setText("Зображення не було обрано")
     def choose_file(self):
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getOpenFileName(self, "Оберіть зображення", "",
@@ -79,6 +91,7 @@ class MatplotlibWidget(QMainWindow):
             self.MplWidget.canvas.axes.imshow(self.img)
             self.MplWidget.canvas.axes.set_title('Обране зображення')
             self.MplWidget.canvas.draw()
+            self.FlagLoaded = True
 
 
 if __name__ == "__main__":

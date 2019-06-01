@@ -92,14 +92,26 @@ def signle_predition(path=img_path):
     data = data.iloc[0:, 1:data.shape[1]]
 
     # load the model from disk
-    filename = 'data/result/model/model.sav'
-    file = open(filename, 'rb')
-    loaded = pickle.load(file)
-    #print("\n\n", loaded)
-    print("Model was loaded")
+    accuracy = [70,80,80,80,80,90]
+    label_ukr = [["норма", "аутоімунний гепатит", "гепатит В", "гепатит С", "хвороба Вільсона"],
+                 ['не хвороба Вільсона', 'хвороба Вільсона'], ['не гепатит В', 'гепатит В'], ['не гепатит С', 'гепатит С'],
+                 ['не аутоімунний гепатит', 'аутоімунний гепатит'], ['патологія', 'норма']]
+    kind_ukr = ["серед усіх хвороб", "хвороба Вільсона - проти всіх", "гепатит С - проти всіх", "гепатит В - проти всіх",
+               "аутоімунний гепатит - проти всіх", "норма - патологія"]
+    poolParam = ["diagnosis_code", "iswls", "ishpb", "ishpc", "isauh", "isnorm"]
+    model_name = 'Logistic Regression'
+    text = ""
+    for number in range(len(poolParam)):
+        filename = 'data/result/model/' + model_name + ' ' + poolParam[number] + '.sav'
+        file = open(filename, 'rb')
+        loaded = pickle.load(file)
+        print("Model <" + model_name + " " + poolParam[number]  + "> was loaded")
+        #print()
 
-    # Test the classifier
-    y_pred = loaded.predict(data)
-    print(y_pred)
-
-signle_predition()
+        # Test the classifier
+        y_pred = int(loaded.predict(data))
+        part = 'Точність: {1}% Класифікатор: <{0}>\n[РЕЗУЛЬТАТ]: {2}\n\n'.format(kind_ukr[number], accuracy[number],label_ukr[number][y_pred])
+        text = text + part
+    print(text)
+    return text
+#signle_predition()

@@ -177,8 +177,8 @@ cols_to_drop = ['id','data_source','diagnosis_code','isnorm','isauh','ishpb','is
 model_features = [col for col in train.columns if col not in cols_to_drop]
 
 # pool of all classification settings
-poolParam = ["diagnosis_code"]#,"iswls","ishpb","ishpc","isauh","isnorm"]
-poolLabel = [all]#, wls, hpb, hpc, auh, norma]
+poolParam = ["diagnosis_code","iswls","ishpb","ishpc","isauh","isnorm"]
+poolLabel = [all, wls, hpb, hpc, auh, norma]
 poolTests = {poolParam[a]:poolLabel[a] for a in range (len(poolParam))}
 
 # single classification setting
@@ -189,9 +189,9 @@ poolTests = {poolParam[a]:poolLabel[a] for a in range (len(poolParam))}
 
 def predict_and_show(X_train, y_train, X_test, y_test, clf, plt, names, clf_name):
     print("\n", clf_name, ":\n================================================\nPredictable attribute: ", current)
-    clf.fit(X_train, y_train)
+    cur = clf.fit(X_train, y_train)
     # Test the classifier
-    y_pred = clf.predict(X_test)
+    y_pred = cur.predict(X_test)
     print("Accuracy:%.2f%%" % (float(accuracy_score(y_test, y_pred)) * 100))
     print("Prediction:\n", y_pred)
     print("Real test:\n", y_test.to_numpy())
@@ -203,26 +203,24 @@ def predict_and_show(X_train, y_train, X_test, y_test, clf, plt, names, clf_name
 
 clf_names,clf_models  = list(), list()
 
-
+'''
 clf_models.append(make_pipeline (#PCA(n_components=2),
                                  StandardScaler(),
                                  tree.DecisionTreeClassifier(random_state=0,criterion='gini',max_features=2)))
 clf_names.append("Decision Tree Classifier")
-
+'''
 
 clf_models.append(make_pipeline (PCA(n_components=5), #StandardScaler(),
                                  linear_model.LogisticRegression(max_iter=1000000, C=1e3,
                                                      solver='newton-cg',penalty="l2" ,multi_class='multinomial'
                                                                  )))
 clf_names.append("Logistic Regression")
-
+'''
 clf_models.append(make_pipeline (PCA(n_components=5), StandardScaler(),
                                  RandomForestClassifier(max_depth=10, n_estimators=100,
                                             max_features=2, random_state=0,
                                             criterion='gini',bootstrap=False)))
 clf_names.append("Random Forest Classifier")
-
-
 
 clf_models.append(make_pipeline (PCA(n_components=3), #StandardScaler(),
                                  svm.SVC(gamma='scale', kernel='rbf')))
@@ -236,11 +234,12 @@ clf_names.append("Gradient Boosting")
 clf_models.append(make_pipeline (PCA(n_components=3), StandardScaler(),
                                  KNeighborsClassifier(5)))
 clf_names.append("k-Nearest Neighbors")
-
+'''
 
 
 
 clfs = {clf_names[a]:clf_models[a] for a in range(len(clf_names))}
+
 for name,model in clfs.items():
     for param, label in poolTests.items():
 
@@ -255,36 +254,24 @@ for name,model in clfs.items():
         current = param
         predict_and_show(X_train, y_train, X_test, y_test, model, plt, label, name)
 
-
-
+'''
 # model saving
-
 # TODO: save all one-vs-all model's and their accuracies
-#prepare 1 (!!!) model for saving
-'''
-name = "Logistic Regression"
-model = clfs[name]
-
-
-# save the model to disk
-filename = 'data/result/model/'+ name +'.sav'
-file = open(filename, 'wb')
-pickle.dump(model, file)
-print("Model of", name, "was saved")
-file.close()
-'''
-
-
 for name,model in clfs.items():
-    filename = 'data/result/model/'+ name +'.sav'
-    file = open(filename, 'wb')
-    pickle.dump(model, file)
-    print("Model of", name, "was saved")
-    file.close()
+    for param, label in poolTests.items():
 
+        X_train = train[model_features]
+        y_train = train[param].astype(int)
+        X_test = test[model_features]
+        y_test = test[param].astype(int)
 
-
-
+        model.fit(X_train, y_train)
+        filename = 'data/result/model/'+ name + ' ' + param +'.sav'
+        file = open(filename, 'wb')
+        pickle.dump(model, file)
+        print("Model called <", name, param, "> was saved")
+        file.close()
+'''
 
 
 # Different additional unused code
