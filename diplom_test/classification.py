@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 import pickle
+from math import ceil
 import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set(style="white")
@@ -13,11 +14,11 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.feature_selection import SelectFromModel
 from sklearn import linear_model,tree
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, KFold, cross_val_score
 from sklearn.pipeline import make_pipeline
 from sklearn import svm
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler,MinMaxScaler
 from sklearn.utils.multiclass import unique_labels
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 
@@ -187,8 +188,8 @@ poolTests = {poolParam[a]:poolLabel[a] for a in range (len(poolParam))}
 
 #====================================================================
 
-def predict_and_show(X_train, y_train, X_test, y_test, clf, plt, names, clf_name):
-    print("\n", clf_name, ":\n================================================\nPredictable attribute: ", current)
+def predict_and_show(X_train, y_train, X_test, y_test, clf, plt, names, clf_name, param):
+    print("\n", clf_name, ":\n================================================\nPredictable attribute: ", param)
     cur = clf.fit(X_train, y_train)
     # Test the classifier
     y_pred = cur.predict(X_test)
@@ -203,12 +204,13 @@ def predict_and_show(X_train, y_train, X_test, y_test, clf, plt, names, clf_name
 
 clf_names,clf_models  = list(), list()
 
+
 '''
 clf_models.append(make_pipeline (#PCA(n_components=2),
                                  StandardScaler(),
                                  tree.DecisionTreeClassifier(random_state=0,criterion='gini',max_features=2)))
 clf_names.append("Decision Tree Classifier")
-'''
+
 
 clf_models.append(make_pipeline (PCA(n_components=5), #StandardScaler(),
                                  linear_model.LogisticRegression(max_iter=1000000, C=1e3,
@@ -221,7 +223,7 @@ clf_models.append(make_pipeline (PCA(n_components=5), StandardScaler(),
                                             max_features=2, random_state=0,
                                             criterion='gini',bootstrap=False)))
 clf_names.append("Random Forest Classifier")
-
+'''
 clf_models.append(make_pipeline (PCA(n_components=3), #StandardScaler(),
                                  svm.SVC(gamma='scale', kernel='rbf')))
 clf_names.append("C-Support Vector Machine")
@@ -237,9 +239,10 @@ clf_names.append("k-Nearest Neighbors")
 '''
 
 
-
 clfs = {clf_names[a]:clf_models[a] for a in range(len(clf_names))}
 
+# Normal model estimation + test/train separated with hands
+'''
 for name,model in clfs.items():
     for param, label in poolTests.items():
 
@@ -251,8 +254,28 @@ for name,model in clfs.items():
         X_test = test[model_features]
         y_test = test[param].astype(int)
 
-        current = param
-        predict_and_show(X_train, y_train, X_test, y_test, model, plt, label, name)
+        predict_and_show(X_train, y_train, X_test, y_test, model, plt, label, name, param)
+'''
+
+# Cross Validation (K-fold) model estimation
+
+for name,model in clfs.items():
+    for param, label in poolTests.items():
+
+        X = data[model_features]
+        y = data[param].astype(int)
+
+        print("\n", name, ":\n================================================\nPredictable attribute: ", param)
+        # cross_val = KFold(n_splits=5, shuffle=True, random_state=1)
+        # for train, test in cross_val.split(data):
+        #    print('train: %s, test: %s' % (train, test))
+
+        rez = np.mean(cross_val_score(model, X, y, cv=10, scoring='accuracy'))
+        rez = round(float(rez),2)
+        print('Accuracy = {}'.format(rez))
+
+
+
 
 '''
 # model saving
@@ -272,6 +295,14 @@ for name,model in clfs.items():
         print("Model called <", name, param, "> was saved")
         file.close()
 '''
+
+
+
+
+
+
+
+
 
 
 # Different additional unused code
