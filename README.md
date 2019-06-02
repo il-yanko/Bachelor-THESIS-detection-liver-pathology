@@ -26,3 +26,6 @@ It is my thesis project at Igor Sikorsky Kyiv Polytechnic Institute.
 - [x] 10-fold Cross-Validation
 
 
+## References ##
+
+1.Haralick R. M. Textural features for image classification / R. M. Haralick, K. S. Shanmugam, I. Dinstein // IEEE Transactions on Systems, Man, and Cybernetics. — 1973. — P. 610–621.
