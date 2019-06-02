@@ -258,7 +258,7 @@ for name,model in clfs.items():
 '''
 
 # Cross Validation (K-fold) model estimation
-
+'''
 for name,model in clfs.items():
     for param, label in poolTests.items():
 
@@ -273,7 +273,7 @@ for name,model in clfs.items():
         rez = np.mean(cross_val_score(model, X, y, cv=10, scoring='accuracy'))
         rez = round(float(rez),2)
         print('Accuracy = {}'.format(rez))
-
+'''
 
 
 
