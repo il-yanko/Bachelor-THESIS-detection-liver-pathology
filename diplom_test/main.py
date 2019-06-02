@@ -51,28 +51,37 @@ class MatplotlibWidget(QMainWindow):
         buttonExit.triggered.connect(sys.exit)
         fileMenu.addAction(buttonExit)
 
+        buttonLaunch = QAction('Запуск', self)
+        buttonLaunch.setStatusTip('Отримати інформацію про запуск класифікатора')
+        self.msgBox1 = QMessageBox(self)
+        self.msgBox1.setIcon(QMessageBox.Information)
+        self.msgBox1.setWindowTitle("Запуск")
+        self.msgBox1.setText("Для запуску класифікатора:\n1) натисніть кнопку <Обрати Зображення>\n2) натисніть кнопку <Аналізувати>")
+        buttonLaunch.triggered.connect(self.msgBox1.exec_)
+        helpMenu.addAction(buttonLaunch)
+
+
+
         buttonInfo = QAction('Додаток', self)
-        buttonInfo.setShortcut('Ctrl+I')
         buttonInfo.setStatusTip('Отримати інформацію про додаток')
-        self.msgBox = QMessageBox(self)
-        self.msgBox.setIcon(QMessageBox.Information)
-        self.msgBox.setWindowTitle("Додаток")
-        self.msgBox.setText("Цей програмний додаток забезпечує завантаження області інтересу та прогнозування можливих дифузних патологій у пацієнта.")
-        buttonInfo.triggered.connect(self.msgBox.exec_)
+        self.msgBox2 = QMessageBox(self)
+        self.msgBox2.setIcon(QMessageBox.Information)
+        self.msgBox2.setWindowTitle("Додаток")
+        self.msgBox2.setText("Цей програмний додаток забезпечує завантаження області інтересу та прогнозування можливих дифузних патологій у пацієнта.")
+        buttonInfo.triggered.connect(self.msgBox2.exec_)
         helpMenu.addAction(buttonInfo)
 
         buttonInfo = QAction('Розробник', self)
-        buttonInfo.setShortcut('Ctrl+D')
         buttonInfo.setStatusTip('Отримати інформацію про розробника')
-        self.msgBox = QMessageBox(self)
-        self.msgBox.setIcon(QMessageBox.Information)
-        self.msgBox.setWindowTitle("Додаток")
-        self.msgBox.setText("Цей програмний додаток було розроблено студентом 4 курсу Янковим І.О.\n"
+        self.msgBox3 = QMessageBox(self)
+        self.msgBox3.setIcon(QMessageBox.Information)
+        self.msgBox3.setWindowTitle("Додаток")
+        self.msgBox3.setText("Цей програмний додаток було розроблено студентом 4 курсу Янковим І.О.\n"
                             "\nНТТУ КПІ ім. Ігоря Сікорського:\n"
                             "Факультет Біомедичної Інженерії (ФБМІ)\n"
                             "Академічна одиниця: група БС-52\n"
                             "Науковий керівник: Настенко Є.А.")
-        buttonInfo.triggered.connect(self.msgBox.exec_)
+        buttonInfo.triggered.connect(self.msgBox3.exec_)
         helpMenu.addAction(buttonInfo)
 
     def analyze(self):
@@ -83,15 +92,20 @@ class MatplotlibWidget(QMainWindow):
     def choose_file(self):
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getOpenFileName(self, "Оберіть зображення", "",
-                                                  "All Files (*);;Image files (*.bmp *.png)", options=options)
+                                                  "Зображення (*.bmp *.png *.jpeg *.jpg)", options=options)
+        extensions = ['png', 'jpg', 'jpeg', 'bmp']
+        fileExtension = (fileName.split('.'))[-1].lower()
         if fileName:
-            self.path = fileName
-            self.img = mpimg.imread(self.path)
-            self.MplWidget.canvas.axes.clear()
-            self.MplWidget.canvas.axes.imshow(self.img)
-            self.MplWidget.canvas.axes.set_title('Обране зображення')
-            self.MplWidget.canvas.draw()
-            self.FlagLoaded = True
+            if fileExtension in extensions:
+                self.path = fileName
+                self.img = mpimg.imread(self.path)
+                self.MplWidget.canvas.axes.clear()
+                self.MplWidget.canvas.axes.imshow(self.img)
+                self.MplWidget.canvas.axes.set_title('Обране зображення')
+                self.MplWidget.canvas.draw()
+                self.FlagLoaded = True
+            else:
+                self.labelResult.setText("Обраний тип файлу не підтримується.\nТипи файлів, що підтримуються:\nBMP, PNG, JPEG, JPG")
 
 
 if __name__ == "__main__":

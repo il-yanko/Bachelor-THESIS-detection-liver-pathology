@@ -6,44 +6,73 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1280</width>
-    <height>1024</height>
+    <width>1024</width>
+    <height>768</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>1280</width>
-    <height>1024</height>
+    <width>1024</width>
+    <height>768</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>1280</width>
-    <height>1024</height>
+    <width>1024</width>
+    <height>768</height>
    </size>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="minimumSize">
+    <size>
+     <width>1024</width>
+     <height>768</height>
+    </size>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>1024</width>
+     <height>768</height>
+    </size>
+   </property>
    <layout class="QGridLayout" name="gridLayout">
-    <item row="3" column="0">
-     <widget class="MplWidget" name="MplWidget" native="true">
+    <item row="1" column="0" alignment="Qt::AlignLeft">
+     <widget class="QPushButton" name="buttonLoader">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="minimumSize">
        <size>
-        <width>512</width>
-        <height>200</height>
+        <width>500</width>
+        <height>50</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
-        <width>512</width>
-        <height>500</height>
+        <width>500</width>
+        <height>50</height>
        </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Arial</family>
+        <pointsize>12</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Обрати Зображенння</string>
       </property>
      </widget>
     </item>
-    <item row="2" column="1" alignment="Qt::AlignRight">
+    <item row="1" column="1" alignment="Qt::AlignRight">
      <widget class="QPushButton" name="buttonAnalyze">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -53,13 +82,13 @@
       </property>
       <property name="minimumSize">
        <size>
-        <width>300</width>
+        <width>500</width>
         <height>50</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
-        <width>300</width>
+        <width>500</width>
         <height>50</height>
        </size>
       </property>
@@ -76,62 +105,18 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="0" colspan="2">
-     <widget class="QLabel" name="labelTitle">
-      <property name="minimumSize">
-       <size>
-        <width>1280</width>
-        <height>150</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>1280</width>
-        <height>200</height>
-       </size>
-      </property>
-      <property name="lineWidth">
-       <number>1</number>
-      </property>
-      <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:24pt; font-weight:600;&quot;&gt;Класифікатор&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:24pt; font-weight:600;&quot;&gt;Дифузних Захворювань Печінки&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0" colspan="2">
-     <widget class="QLabel" name="labelTitle_2">
-      <property name="minimumSize">
-       <size>
-        <width>1280</width>
-        <height>150</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>1280</width>
-        <height>200</height>
-       </size>
-      </property>
-      <property name="lineWidth">
-       <number>1</number>
-      </property>
-      <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:18pt;&quot;&gt;для запуску класифікатора:&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;1) оберіть зображення &lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;2) натисніть кнопку &amp;quot;Аналізувати&amp;quot;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="1">
+    <item row="2" column="1" alignment="Qt::AlignLeft">
      <widget class="QLabel" name="labelResult">
       <property name="minimumSize">
        <size>
-        <width>200</width>
-        <height>400</height>
+        <width>700</width>
+        <height>200</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
-        <width>1000</width>
-        <height>16777215</height>
+        <width>700</width>
+        <height>700</height>
        </size>
       </property>
       <property name="font">
@@ -141,44 +126,54 @@
        </font>
       </property>
       <property name="cursor">
-       <cursorShape>WaitCursor</cursorShape>
+       <cursorShape>ArrowCursor</cursorShape>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
       </property>
       <property name="text">
-       <string>Для отримання прогнозу, будь ласка,
- завантажте зображення і запустіть класифікатор.</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Для отримання прогнозу, будь ласка,&lt;/p&gt;&lt;p&gt;1) завантажте зображення&lt;/p&gt;&lt;p&gt;2) запустіть класифікатор.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
     </item>
-    <item row="2" column="0" alignment="Qt::AlignLeft">
-     <widget class="QPushButton" name="buttonLoader">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
+    <item row="2" column="0" alignment="Qt::AlignHCenter">
+     <widget class="MplWidget" name="MplWidget" native="true">
       <property name="minimumSize">
        <size>
-        <width>300</width>
-        <height>50</height>
+        <width>400</width>
+        <height>400</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
-        <width>300</width>
-        <height>50</height>
+        <width>400</width>
+        <height>400</height>
        </size>
       </property>
-      <property name="font">
-       <font>
-        <family>Arial</family>
-        <pointsize>12</pointsize>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
+     </widget>
+    </item>
+    <item row="0" column="0" colspan="2" alignment="Qt::AlignHCenter">
+     <widget class="QLabel" name="labelTitle">
+      <property name="minimumSize">
+       <size>
+        <width>800</width>
+        <height>35</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>1024</width>
+        <height>35</height>
+       </size>
+      </property>
+      <property name="lineWidth">
+       <number>1</number>
       </property>
       <property name="text">
-       <string>Оберіть Зображенння</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Класифікатор Дифузних Захворювань Печінки&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
     </item>
@@ -189,7 +184,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1280</width>
+     <width>1024</width>
      <height>18</height>
     </rect>
    </property>
