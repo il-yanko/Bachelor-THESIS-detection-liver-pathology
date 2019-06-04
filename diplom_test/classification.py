@@ -211,8 +211,8 @@ clf_models.append(make_pipeline (#PCA(n_components=2),
                                  tree.DecisionTreeClassifier(random_state=0,criterion='gini',max_features=2)))
 clf_names.append("Decision Tree Classifier")
 
-
-clf_models.append(make_pipeline (PCA(n_components=5), #StandardScaler(),
+'''
+clf_models.append(make_pipeline (PCA(n_components=3), StandardScaler(),
                                  linear_model.LogisticRegression(max_iter=1000000, C=1e3,
                                                      solver='newton-cg',penalty="l2" ,multi_class='multinomial'
                                                                  )))
@@ -220,10 +220,10 @@ clf_names.append("Logistic Regression")
 '''
 clf_models.append(make_pipeline (PCA(n_components=5), StandardScaler(),
                                  RandomForestClassifier(max_depth=10, n_estimators=100,
-                                            max_features=2, random_state=0,
+                                            max_features=2, random_state=0, #class_weight='balanced',
                                             criterion='gini',bootstrap=False)))
 clf_names.append("Random Forest Classifier")
-'''
+
 clf_models.append(make_pipeline (PCA(n_components=3), #StandardScaler(),
                                  svm.SVC(gamma='scale', kernel='rbf')))
 clf_names.append("C-Support Vector Machine")
@@ -275,26 +275,22 @@ for name,model in clfs.items():
         print('Accuracy = {}'.format(rez))
 '''
 
-
-
-'''
 # model saving
-# TODO: save all one-vs-all model's and their accuracies
+# TODO: save all model and their accuracies
+
 for name,model in clfs.items():
     for param, label in poolTests.items():
 
-        X_train = train[model_features]
-        y_train = train[param].astype(int)
-        X_test = test[model_features]
-        y_test = test[param].astype(int)
+        X1 = data[model_features]
+        y1 = data[param].astype(int)
 
-        model.fit(X_train, y_train)
+        model.fit(X1, y1)
         filename = 'data/result/model/'+ name + ' ' + param +'.sav'
         file = open(filename, 'wb')
         pickle.dump(model, file)
         print("Model called <", name, param, "> was saved")
         file.close()
-'''
+
 
 
 

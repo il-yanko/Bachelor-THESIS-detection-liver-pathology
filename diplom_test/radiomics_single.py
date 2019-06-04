@@ -92,14 +92,14 @@ def signle_predition(path=img_path):
     data = data.iloc[0:, 1:data.shape[1]]
 
     # load the model from disk
-    accuracy = [70,80,80,80,80,90]
+    model_name = 'Logistic Regression'
+    accuracy = [74,89,89,89,90,85]
     label_ukr = [["норма", "аутоімунний гепатит", "гепатит В", "гепатит С", "хвороба Вільсона"],
                  ['НЕ хвороба Вільсона', 'хвороба Вільсона'], ['НЕ гепатит В', 'гепатит В'], ['НЕ гепатит С', 'гепатит С'],
                  ['НЕ аутоімунний гепатит', 'аутоімунний гепатит'], ['патологія', 'норма']]
     kind_ukr = ["серед усіх хвороб", "хвороба Вільсона - проти всіх", "гепатит С - проти всіх", "гепатит В - проти всіх",
                "аутоімунний гепатит - проти всіх", "норма - патологія"]
     poolParam = ["diagnosis_code", "iswls", "ishpb", "ishpc", "isauh", "isnorm"]
-    model_name = 'Logistic Regression'
     text = "Тип класифікатора: <b>{0}</b><br><br>\n\n".format(model_name)
     for number in range(len(poolParam)):
         filename = 'data/result/model/' + model_name + ' ' + poolParam[number] + '.sav'
