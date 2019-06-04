@@ -1,8 +1,8 @@
 import glob
 import numpy as np
-import cv2
+#import cv2
 from PIL import Image
-import os.path
+#import os.path
 
 
 class ImgReader:
@@ -36,6 +36,7 @@ class DataReader:
             return
 
 # ALTERNATIVE LOADER:
+'''
 # process RGB/grayscale
 def rgb_to_gray(rgb):
     # scalar product of colors with certain theoretical coefficients according to the YUV system
@@ -61,7 +62,7 @@ def get_all_img_make_gray(cwd, folder_name):
     for i in range(len(img_arr)):
         img_arr[i] = rgb_to_gray(img_arr[i])
     return img_arr
-
+'''
 # test load .csv
 '''
 import os.path

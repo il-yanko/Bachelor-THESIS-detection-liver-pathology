@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 import pickle
-from math import ceil
+#from math import ceil
 import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set(style="white")
@@ -212,12 +212,18 @@ clf_models.append(make_pipeline (#PCA(n_components=2),
 clf_names.append("Decision Tree Classifier")
 
 '''
+clf_models.append(make_pipeline (PCA(n_components=2),
+                                 StandardScaler(),
+                                 linear_model.SGDClassifier(max_iter=1000000, tol=1e-3),
+                                 ))
+clf_names.append("Stochastic Gradient Descent")
+'''
 clf_models.append(make_pipeline (PCA(n_components=3), StandardScaler(),
                                  linear_model.LogisticRegression(max_iter=1000000, C=1e3,
                                                      solver='newton-cg',penalty="l2" ,multi_class='multinomial'
                                                                  )))
 clf_names.append("Logistic Regression")
-'''
+
 clf_models.append(make_pipeline (PCA(n_components=5), StandardScaler(),
                                  RandomForestClassifier(max_depth=10, n_estimators=100,
                                             max_features=2, random_state=0, #class_weight='balanced',
@@ -276,6 +282,7 @@ for name,model in clfs.items():
 '''
 
 # model saving
+'''
 # TODO: save all model and their accuracies
 
 for name,model in clfs.items():
@@ -290,7 +297,7 @@ for name,model in clfs.items():
         pickle.dump(model, file)
         print("Model called <", name, param, "> was saved")
         file.close()
-
+'''
 
 
 

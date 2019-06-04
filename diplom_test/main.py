@@ -5,12 +5,9 @@ from PyQt5.QtWidgets import *
 from PyQt5.uic import loadUi
 from PyQt5 import QtCore, QtGui
 
-from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as NavigationToolbar)
+#from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as NavigationToolbar)
 import matplotlib.image as mpimg
 
-import numpy as np
-import random
-import time
 import sys
 
 import radiomics_single as rs
