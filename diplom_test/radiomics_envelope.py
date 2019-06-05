@@ -57,35 +57,6 @@ for i in range (folderNumber):
         nrrd.write(label_path_to, label)
 '''
 
-# Alternative for 1 image
-'''
-# Declare the destination of the data
-folder = "/data/bmp/" + "auh" + "/"
-name = "2" + ".bmp"
-path_from = os.getcwd() + folder + name
-
-# Load our 2D image
-image = cv2.imread(path_from)
-image = np.array(rgb_to_gray(image))
-
-# Add 1 additional axis for future Radiomics processing
-image = image[..., np.newaxis]
-label = np.ones(shape=image.shape)
-
-# Declare the source of the data
-folder = "data/nrrd/" + "auh"
-name_image = "auh" + "_image_" + "2" + ".nrrd"
-name_label = "auh" + "_label_" + "2" + ".nrrd"
-image_path_to = os.getcwd() + sl + folder + sl + name_image
-label_path_to = os.getcwd() + sl + folder + sl + name_label
-
-create_directory(folder)
-
-# Save the image as NRRD
-nrrd.write(image_path_to, image)
-nrrd.write(label_path_to, label)
-'''
-
 data_array = list()
 # Declare the source of NRRD data
 
@@ -103,7 +74,7 @@ for i in range(folderNumber):
         label_path_to = path + name_label
 
         # Instantiate the extractor
-        extractor = featureextractor.RadiomicsFeaturesExtractor()
+        extractor = featureextractor.RadiomicsFeatureExtractor()
         extractor.disableAllFeatures()
         extractor.enableFeatureClassByName('firstorder')
         extractor.enableFeatureClassByName('glcm')

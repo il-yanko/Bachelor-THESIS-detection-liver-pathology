@@ -27,7 +27,7 @@ folderName = "tmp"
 sl = "/"
 img_path = os.getcwd() + "/data/" + format + sl + folderName + sl + "1." + format
 
-def signle_predition(path=img_path):
+def signle_prediction(path=img_path):
     image = np.asarray(Image.open(path).convert('L'), dtype=np.uint8)
     #image = ImgReader.read_directory(path, "png")
 
@@ -48,7 +48,7 @@ def signle_predition(path=img_path):
     nrrd.write(label_path_to, label)
 
     # Instantiate the extractor
-    extractor = featureextractor.RadiomicsFeaturesExtractor()
+    extractor = featureextractor.RadiomicsFeatureExtractor()
     extractor.disableAllFeatures()
     extractor.enableFeatureClassByName('firstorder')
     extractor.enableFeatureClassByName('glcm')
@@ -87,11 +87,11 @@ def signle_predition(path=img_path):
 
 
     data = pd.read_csv("data/result/single.csv", ";")
-    data = data.iloc[0:, 1:data.shape[1]]
+    data = data.iloc[0:, 2:data.shape[1]]
 
     # load the model from disk
-    model_name = 'Stochastic Gradient Descent'
-    accuracy = [74,89,89,89,90,85]
+    model_name = 'Multi-layer Perceptron'
+    accuracy = [74,94,84,86,92,83]
     label_ukr = [["норма", "аутоімунний гепатит", "гепатит В", "гепатит С", "хвороба Вільсона"],
                  ['НЕ хвороба Вільсона', 'хвороба Вільсона'], ['НЕ гепатит В', 'гепатит В'], ['НЕ гепатит С', 'гепатит С'],
                  ['НЕ аутоімунний гепатит', 'аутоімунний гепатит'], ['патологія', 'норма']]
@@ -99,7 +99,9 @@ def signle_predition(path=img_path):
                "аутоімунний гепатит - проти всіх", "норма - патологія"]
     poolParam = ["diagnosis_code", "iswls", "ishpb", "ishpc", "isauh", "isnorm"]
     text = "Тип класифікатора: <b>{0}</b><br><br>\n\n".format(model_name)
-    for number in range(len(poolParam)):
+
+    models = [0,5]
+    for number in models:
         filename = 'data/result/model/' + model_name + ' ' + poolParam[number] + '.sav'
         file = open(filename, 'rb')
         loaded = pickle.load(file)

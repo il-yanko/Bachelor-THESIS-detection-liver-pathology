@@ -24,7 +24,7 @@ class MatplotlibWidget(QMainWindow):
         self.buttonLoader.clicked.connect(self.choose_file)
         self.buttonAnalyze.clicked.connect(self.analyze)
         #self.addToolBar(NavigationToolbar(self.MplWidget.canvas, self))
-        self.setWindowIcon(QtGui.QIcon("logo.png"))
+        self.setWindowIcon(QtGui.QIcon("app.ico"))
 
         mainMenu = self.menuBar()
         fileMenu = mainMenu.addMenu('Файл')
@@ -83,7 +83,7 @@ class MatplotlibWidget(QMainWindow):
 
     def analyze(self):
         if (self.FlagLoaded):
-            self.labelResult.setText(rs.signle_predition(self.path))
+            self.labelResult.setText(rs.signle_prediction(self.path))
         else:
             self.labelResult.setText("Зображення не було обрано")
     def choose_file(self):

@@ -21,6 +21,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler,MinMaxScaler
 from sklearn.utils.multiclass import unique_labels
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+from sklearn.neural_network import MLPClassifier
 
 
 #from boruta import BorutaPy
@@ -210,14 +211,23 @@ clf_models.append(make_pipeline (#PCA(n_components=2),
                                  StandardScaler(),
                                  tree.DecisionTreeClassifier(random_state=0,criterion='gini',max_features=2)))
 clf_names.append("Decision Tree Classifier")
+'''
 
+
+clf_models.append(make_pipeline (StandardScaler(),PCA(n_components=10),
+
+                                 MLPClassifier(solver='lbfgs', alpha=1e-3, shuffle=True,
+                                               activation='logistic', max_iter=1000000,
+                                               hidden_layer_sizes=(5, 10), random_state=1),
+                                 ))
+clf_names.append("Multi-layer Perceptron")
 '''
 clf_models.append(make_pipeline (PCA(n_components=2),
                                  StandardScaler(),
                                  linear_model.SGDClassifier(max_iter=1000000, tol=1e-3),
                                  ))
 clf_names.append("Stochastic Gradient Descent")
-'''
+
 clf_models.append(make_pipeline (PCA(n_components=3), StandardScaler(),
                                  linear_model.LogisticRegression(max_iter=1000000, C=1e3,
                                                      solver='newton-cg',penalty="l2" ,multi_class='multinomial'
@@ -278,7 +288,7 @@ for name,model in clfs.items():
 
         rez = np.mean(cross_val_score(model, X, y, cv=10, scoring='accuracy'))
         rez = round(float(rez),2)
-        print('Accuracy = {}'.format(rez))
+        print('Accuracy = {}%'.format(int(rez*100)))
 '''
 
 # model saving
