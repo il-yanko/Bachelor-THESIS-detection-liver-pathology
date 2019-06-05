@@ -29,4 +29,5 @@ It is my thesis project at Igor Sikorsky Kyiv Polytechnic Institute.
 
 ## References ##
 
-1.Haralick R. M. Textural features for image classification / R. M. Haralick, K. S. Shanmugam, I. Dinstein // IEEE Transactions on Systems, Man, and Cybernetics. — 1973. — P. 610–621.
+1. Haralick R. M. Textural features for image classification / R. M. Haralick, K. S. Shanmugam, I. Dinstein // IEEE Transactions on Systems, Man, and Cybernetics. — 1973. — P. 610–621.
+2. Hosny A. Computational radiomics system to decode the radiographic phenotype / A. Hosny, J. J. M. van Griethuysen, C. Parmar [et al.] // Cancer Research. — 2017. — Vol. 77, No. 21. — P. e104–e107.
