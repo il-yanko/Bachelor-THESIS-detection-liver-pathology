@@ -21,6 +21,7 @@ It is my thesis project at Igor Sikorsky Kyiv Polytechnic Institute.
 - [x] C-Support Vector Machine
 - [x] Gradient Boosting
 - [x] k-Nearest Neighbors
+- [x] Multi-layer Perceptron
 
 ### Classificator Estimator:
 - [x] 10-fold Cross-Validation
