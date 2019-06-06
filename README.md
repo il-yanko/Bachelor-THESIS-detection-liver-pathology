@@ -30,4 +30,6 @@ It is my thesis project at Igor Sikorsky Kyiv Polytechnic Institute.
 ## References ##
 
 1. Haralick R. M. Textural features for image classification / R. M. Haralick, K. S. Shanmugam, I. Dinstein // IEEE Transactions on Systems, Man, and Cybernetics. — 1973. — P. 610–621.
-2. Hosny A. Computational radiomics system to decode the radiographic phenotype / A. Hosny, J. J. M. van Griethuysen, C. Parmar [et al.] // Cancer Research. — 2017. — Vol. 77, No. 21. — P. e104–e107.
+2. Galloway M. M. Texture analysis using gray level run lengths / M. M. Galloway // Computer Graphics and Image Processing. — 1974. — Vol. 4, No. 2. — P. 172–179.
+3. Thibault G. Texture indexes and gray level size zone matrix application to cell nuclei classification / G. Thibault, B. Fertil, C. Navarro, S. Pereira // Pattern Recognition and Information Processing. — 2009. — No. November. — P. 140–145.
+4. Hosny A. Computational radiomics system to decode the radiographic phenotype / A. Hosny, J. J. M. van Griethuysen, C. Parmar [et al.] // Cancer Research. — 2017. — Vol. 77, No. 21. — P. e104–e107.
