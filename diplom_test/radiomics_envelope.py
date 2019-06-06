@@ -100,7 +100,7 @@ for i in range(folderNumber):
                 result[column] = 0
         data_array.append(result)
 
-toBeDeleted = ['diagnostics_Versions_PyRadiomics', 'diagnostics_Versions_Numpy',
+toBeDeleted = ['diagnostics_Image-original_Dimensionality','diagnostics_Versions_PyRadiomics', 'diagnostics_Versions_Numpy',
                'diagnostics_Versions_SimpleITK', 'diagnostics_Versions_PyWavelet',
                'diagnostics_Versions_Python','diagnostics_Configuration_Settings',
                'diagnostics_Configuration_EnabledImageTypes','diagnostics_Image-original_Hash',

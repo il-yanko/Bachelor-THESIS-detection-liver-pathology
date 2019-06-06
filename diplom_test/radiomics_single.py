@@ -12,6 +12,20 @@ import nrrd
 from radiomics import featureextractor
 # This module is used for I/O of the serialized algorithms
 import pickle
+# This module is used for our algorithms
+import sklearn
+from sklearn.decomposition import PCA
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.feature_selection import SelectFromModel
+from sklearn import linear_model,tree
+from sklearn.metrics import accuracy_score
+from sklearn.pipeline import make_pipeline
+from sklearn import svm
+import sklearn.utils._cython_blas
+import sklearn.neighbors.typedefs
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.preprocessing import StandardScaler
+from sklearn.neural_network import MLPClassifier
 
 # Create target directory if don't exist
 def create_directory(directory):
@@ -49,13 +63,14 @@ def signle_prediction(path=img_path):
 
     # Instantiate the extractor
     extractor = featureextractor.RadiomicsFeatureExtractor()
+
     extractor.disableAllFeatures()
-    extractor.enableFeatureClassByName('firstorder')
-    extractor.enableFeatureClassByName('glcm')
-    extractor.enableFeatureClassByName('glrlm')
-    extractor.enableFeatureClassByName('ngtdm')
-    extractor.enableFeatureClassByName('gldm')
-    extractor.enableFeatureClassByName('glszm')
+    extractor.enableFeatureClassByName(str('firstorder'))
+    extractor.enableFeatureClassByName(str('glcm'))
+    extractor.enableFeatureClassByName(str('glrlm'))
+    extractor.enableFeatureClassByName(str('ngtdm'))
+    extractor.enableFeatureClassByName(str('gldm'))
+    extractor.enableFeatureClassByName(str('glszm'))
 
 
     #print("Extraction parameters:\n\t", extractor.settings)
@@ -64,15 +79,16 @@ def signle_prediction(path=img_path):
 
     # result -> ordered dict
     result = extractor.execute(image_path_to, label_path_to)
-    toBeDeleted = ['diagnostics_Versions_PyRadiomics', 'diagnostics_Versions_Numpy',
+    toBeDeleted = ['diagnostics_Image-original_Dimensionality', 'diagnostics_Versions_PyRadiomics',
+                   'diagnostics_Versions_Numpy',
                    'diagnostics_Versions_SimpleITK', 'diagnostics_Versions_PyWavelet',
-                   'diagnostics_Versions_Python','diagnostics_Configuration_Settings',
-                   'diagnostics_Configuration_EnabledImageTypes','diagnostics_Image-original_Hash',
-                   'diagnostics_Image-original_Spacing','diagnostics_Image-original_Size',
+                   'diagnostics_Versions_Python', 'diagnostics_Configuration_Settings',
+                   'diagnostics_Configuration_EnabledImageTypes', 'diagnostics_Image-original_Hash',
+                   'diagnostics_Image-original_Spacing', 'diagnostics_Image-original_Size',
                    'diagnostics_Mask-original_Hash', 'diagnostics_Mask-original_Spacing',
                    'diagnostics_Mask-original_Size', 'diagnostics_Mask-original_BoundingBox',
                    'diagnostics_Mask-original_VoxelNum', 'diagnostics_Mask-original_VolumeNum',
-                   'diagnostics_Mask-original_CenterOfMassIndex','diagnostics_Mask-original_CenterOfMass']
+                   'diagnostics_Mask-original_CenterOfMassIndex', 'diagnostics_Mask-original_CenterOfMass']
     for feature in range(len(toBeDeleted)):
         del(result[toBeDeleted[feature]])
 
@@ -87,7 +103,7 @@ def signle_prediction(path=img_path):
 
 
     data = pd.read_csv("data/result/single.csv", ";")
-    data = data.iloc[0:, 2:data.shape[1]]
+    data = data.iloc[0:, 1:data.shape[1]]
 
     # load the model from disk
     model_name = 'Multi-layer Perceptron'
