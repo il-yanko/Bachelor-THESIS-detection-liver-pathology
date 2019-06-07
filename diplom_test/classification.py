@@ -179,8 +179,8 @@ cols_to_drop = ['id','data_source','diagnosis_code','isnorm','isauh','ishpb','is
 model_features = [col for col in train.columns if col not in cols_to_drop]
 
 # pool of all classification settings
-poolParam = ["diagnosis_code","iswls","ishpb","ishpc","isauh","isnorm"]
-poolLabel = [all, wls, hpb, hpc, auh, norma]
+poolParam = ["diagnosis_code"]#,"iswls","ishpb","ishpc","isauh","isnorm"]
+poolLabel = [all]#, wls, hpb, hpc, auh, norma]
 poolTests = {poolParam[a]:poolLabel[a] for a in range (len(poolParam))}
 
 # single classification setting
@@ -212,8 +212,6 @@ clf_models.append(make_pipeline (#PCA(n_components=2),
                                  tree.DecisionTreeClassifier(random_state=0,criterion='gini',max_features=2)))
 clf_names.append("Decision Tree Classifier")
 '''
-
-
 clf_models.append(make_pipeline (StandardScaler(),KernelPCA(n_components=10,kernel='rbf'),
                                  MLPClassifier(solver='lbfgs', alpha=1e-3, shuffle=True,
                                                activation='logistic', max_iter=1000000,
@@ -273,7 +271,7 @@ for name,model in clfs.items():
 '''
 
 # Cross Validation (K-fold) model estimation
-
+'''
 for name,model in clfs.items():
     for param, label in poolTests.items():
 
@@ -288,6 +286,97 @@ for name,model in clfs.items():
         rez = np.mean(cross_val_score(model, X, y, cv=10, scoring='accuracy'))
         rez = round(float(rez),2)
         print('Accuracy = {}%'.format(int(rez*100)))
+'''
+
+# ROC (only for diagnosis_code!)
+from sklearn.metrics import roc_curve, auc
+for name,model in clfs.items():
+    for param, label in poolTests.items():
+
+        from sklearn.multiclass import OneVsRestClassifier
+        from sklearn.preprocessing import label_binarize
+        from scipy import interp
+        from itertools import cycle
+
+        model = OneVsRestClassifier(model)
+
+        X_train = train[model_features]
+        y_train = label_binarize(train[param].astype(int).as_matrix(),classes=[0, 1, 2,3,4])
+        X_test = test[model_features]
+        y_test = label_binarize(test[param].astype(int).as_matrix(),classes=[0, 1, 2,3,4])
+
+        cur = model.fit(X_train, y_train)
+        # Test the classifier
+        y_score = cur.predict(X_test)
+
+        # Compute ROC curve and ROC area for each class
+        fpr = dict()
+        tpr = dict()
+        roc_auc = dict()
+
+        n_classes = 5
+        lw = 2
+        '''
+        print("test= {}".format(y_test))
+        print("score= {}".format(y_score))
+        '''
+        for i in range(n_classes):
+            fpr[i], tpr[i], _ = roc_curve(y_test[:, i], y_score[:, i])
+            roc_auc[i] = auc(fpr[i], tpr[i])
+
+        # Compute micro-average ROC curve and ROC area
+        fpr["micro"], tpr["micro"], _ = roc_curve(y_test.ravel(), y_score.ravel())
+        roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+
+        # Compute macro-average ROC curve and ROC area
+
+        # First aggregate all false positive rates
+        all_fpr = np.unique(np.concatenate([fpr[i] for i in range(n_classes)]))
+
+        # Then interpolate all ROC curves at this points
+        mean_tpr = np.zeros_like(all_fpr)
+        for i in range(n_classes):
+            mean_tpr += interp(all_fpr, fpr[i], tpr[i])
+
+        # Finally average it and compute AUC
+        mean_tpr /= n_classes
+
+        fpr["macro"] = all_fpr
+        tpr["macro"] = mean_tpr
+        roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
+
+        # Plot all ROC curves
+        plt.figure()
+        plt.plot(fpr["micro"], tpr["micro"],
+                 label='мікро-усереднена ROC крива (площа = {0:0.2f})'
+                       ''.format(roc_auc["micro"]),
+                 color='deeppink', linestyle=':', linewidth=5)
+
+        plt.plot(fpr["macro"], tpr["macro"],
+                 label='макро-усереднена ROC крива (площа = {0:0.2f})'
+                       ''.format(roc_auc["macro"]),
+                 color='navy', linestyle=':', linewidth=5)
+
+        label_ukr = ["норма", "аутоімунний гепатит", "гепатит В", "гепатит С", "хвороба Вільсона"]
+
+        colors = cycle(['#FF0000', '#1B1BB3', '#269926', '#C30083', '#FFD300'])
+        for i, color in zip(range(n_classes), colors):
+            plt.plot(fpr[i], tpr[i], color=color, lw=lw, linewidth=3,linestyle='-',
+                     label='ROC крива класу {0} (площа = {1:0.2f})'
+                           ''.format(label_ukr[i], roc_auc[i]))
+
+        plt.plot([0, 1], [0, 1], 'k--', lw=lw, linewidth=3)
+        plt.xlim([-0.01, 1.0])
+        plt.ylim([-0.01, 1.05])
+        plt.xlabel('Частка ХИБНО ПОЗИТИВНИХ')
+        plt.ylabel('Частка ІСТИНО ПОЗИТИВНИХ')
+        plt.title('ROC обраної моделі')
+        plt.legend(loc="lower right")
+        plt.show()
+
+
+
+
 
 
 # model saving
