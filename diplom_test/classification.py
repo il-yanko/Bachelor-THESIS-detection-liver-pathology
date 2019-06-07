@@ -9,7 +9,7 @@ import seaborn as sns
 sns.set(style="white")
 sns.set(style="whitegrid", color_codes=True)
 
-from sklearn.decomposition import PCA
+from sklearn.decomposition import PCA, KernelPCA
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.feature_selection import SelectFromModel
 from sklearn import linear_model,tree
@@ -214,8 +214,7 @@ clf_names.append("Decision Tree Classifier")
 '''
 
 
-clf_models.append(make_pipeline (StandardScaler(),PCA(n_components=10),
-
+clf_models.append(make_pipeline (StandardScaler(),KernelPCA(n_components=10,kernel='rbf'),
                                  MLPClassifier(solver='lbfgs', alpha=1e-3, shuffle=True,
                                                activation='logistic', max_iter=1000000,
                                                hidden_layer_sizes=(5, 10), random_state=1),
@@ -274,7 +273,7 @@ for name,model in clfs.items():
 '''
 
 # Cross Validation (K-fold) model estimation
-'''
+
 for name,model in clfs.items():
     for param, label in poolTests.items():
 
@@ -289,7 +288,7 @@ for name,model in clfs.items():
         rez = np.mean(cross_val_score(model, X, y, cv=10, scoring='accuracy'))
         rez = round(float(rez),2)
         print('Accuracy = {}%'.format(int(rez*100)))
-'''
+
 
 # model saving
 '''
