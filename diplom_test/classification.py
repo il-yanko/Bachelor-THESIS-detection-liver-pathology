@@ -9,7 +9,7 @@ import seaborn as sns
 sns.set(style="white")
 sns.set(style="whitegrid", color_codes=True)
 
-from sklearn.decomposition import PCA, KernelPCA
+from sklearn.decomposition import PCA, KernelPCA, FactorAnalysis
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.feature_selection import SelectFromModel
 from sklearn import linear_model,tree
@@ -28,6 +28,7 @@ from sklearn.neural_network import MLPClassifier
 
 import warnings
 warnings.filterwarnings("ignore")
+
 
 def plot_confusion_matrix(y_true, y_pred, classes,
                           normalize=False, title=None,
@@ -179,8 +180,10 @@ cols_to_drop = ['id','data_source','diagnosis_code','isnorm','isauh','ishpb','is
 model_features = [col for col in train.columns if col not in cols_to_drop]
 
 # pool of all classification settings
-poolParam = ["diagnosis_code"]#,"iswls","ishpb","ishpc","isauh","isnorm"]
-poolLabel = [all]#, wls, hpb, hpc, auh, norma]
+poolParam = ["diagnosis_code","iswls","ishpb","ishpc","isauh","isnorm"]
+poolLabel = [all, wls, hpb, hpc, auh, norma]
+
+
 poolTests = {poolParam[a]:poolLabel[a] for a in range (len(poolParam))}
 
 # single classification setting
@@ -212,7 +215,7 @@ clf_models.append(make_pipeline (#PCA(n_components=2),
                                  tree.DecisionTreeClassifier(random_state=0,criterion='gini',max_features=2)))
 clf_names.append("Decision Tree Classifier")
 '''
-clf_models.append(make_pipeline (StandardScaler(),KernelPCA(n_components=10,kernel='rbf'),
+clf_models.append(make_pipeline (StandardScaler(),FactorAnalysis(n_components=10),#KernelPCA(n_components=10,kernel='rbf'),
                                  MLPClassifier(solver='lbfgs', alpha=1e-3, shuffle=True,
                                                activation='logistic', max_iter=1000000,
                                                hidden_layer_sizes=(5, 10), random_state=1),
@@ -271,108 +274,244 @@ for name,model in clfs.items():
 '''
 
 # Cross Validation (K-fold) model estimation
+def k_fold_cv(data, model_features, clf, clf_name, criterion, cv_number=10):
+    X = data[model_features]
+    y = data[criterion].astype(int)
+
+    print("\n{}:\n================================================\nPredictable"
+          "attribute: {}\n".format(clf_name, criterion))
+    # cross_val = KFold(n_splits=5, shuffle=True, random_state=1)
+    # for train, test in cross_val.split(data):
+    #    print('train: %s, test: %s' % (train, test))
+
+    rez = np.mean(cross_val_score(clf, X, y, cv=cv_number, scoring='accuracy'))
+    rez = int(round( float(rez), 2) * 100)
+    print('Accuracy = {}%'.format(rez))
+    return rez
+
+#K-fold
 '''
 for name,model in clfs.items():
     for param, label in poolTests.items():
-
-        X = data[model_features]
-        y = data[param].astype(int)
-
-        print("\n", name, ":\n================================================\nPredictable attribute: ", param)
-        # cross_val = KFold(n_splits=5, shuffle=True, random_state=1)
-        # for train, test in cross_val.split(data):
-        #    print('train: %s, test: %s' % (train, test))
-
-        rez = np.mean(cross_val_score(model, X, y, cv=10, scoring='accuracy'))
-        rez = round(float(rez),2)
-        print('Accuracy = {}%'.format(int(rez*100)))
+        k_fold_cv(data, model_features, model, name, param, cv_number=5)
 '''
 
+# pool of all classification settings
+poolParam = ["diagnosis_code"]#,"iswls","ishpb","ishpc","isauh","isnorm"]
+poolLabel = [all]#, wls, hpb, hpc, auh, norma]
+poolTests = {poolParam[a]:poolLabel[a] for a in range (len(poolParam))}
+# відбір моделі
+model_name = "Multi-layer Perceptron"
+for param, label in poolTests.items():
+    # Options for model size
+    n_components = np.arange(2, int(len(model_features)/2), 10)
+    scores = list()
+
+    for model_size in n_components:
+
+        model = make_pipeline (StandardScaler(),FactorAnalysis(n_components=model_size),
+                   #KernelPCA(n_components=model_size,kernel='sigmoid'),
+                    #LDA(n_components=model_size,solver='svd'),
+                    MLPClassifier(solver='lbfgs', alpha=1e-3, shuffle=True,
+                    activation='logistic', max_iter=1000000,
+                    hidden_layer_sizes=(5, 10), random_state=1),
+                  )
+        scores.append(k_fold_cv(data, model_features, model, model_name, param, cv_number=5))
+    print(scores,'\n')
+    best = max(scores)
+    best_size = n_components[np.argmax(scores)]
+    print("Кращий результат - {}% дає модель зі {} факторів".format(best,best_size))
+    plt.figure()
+    plt.plot(n_components, scores, label='ТОЧНІСТЬ класифікації', lw=5, color='r')
+    #plt.axhline(y=50, lw=3, color='k', linestyle='--', label='50% шанс')
+    plt.xlabel('Кількість компонент')
+    plt.ylabel('Точність')
+    plt.ylim(50,100)
+    plt.legend(loc='lower right')
+    plt.title("{} + {}".format(model_name, 'LDA'))
+    plt.show()
+
+
+
+
+# REDO !!!!!!!!!!!!!!!!!!!!
+def roc ():
+    from sklearn.metrics import roc_curve, auc
+    for name,model in clfs.items():
+        for param, label in poolTests.items():
+
+            from sklearn.multiclass import OneVsRestClassifier
+            from sklearn.preprocessing import label_binarize
+            from scipy import interp
+            from itertools import cycle
+
+            model = OneVsRestClassifier(model)
+
+            X_train = train[model_features]
+            y_train = label_binarize(train[param].astype(int).as_matrix(),classes=[0, 1, 2,3,4])
+            X_test = test[model_features]
+            y_test = label_binarize(test[param].astype(int).as_matrix(),classes=[0, 1, 2,3,4])
+
+            cur = model.fit(X_train, y_train)
+            # Test the classifier
+            y_score = cur.predict(X_test)
+
+            # Compute ROC curve and ROC area for each class
+            fpr = dict()
+            tpr = dict()
+            roc_auc = dict()
+
+            n_classes = 5
+            lw = 2
+            '''
+            print("test= {}".format(y_test))
+            print("score= {}".format(y_score))
+            '''
+            for i in range(n_classes):
+                fpr[i], tpr[i], _ = roc_curve(y_test[:, i], y_score[:, i])
+                roc_auc[i] = auc(fpr[i], tpr[i])
+
+            # Compute micro-average ROC curve and ROC area
+            fpr["micro"], tpr["micro"], _ = roc_curve(y_test.ravel(), y_score.ravel())
+            roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+
+            # Compute macro-average ROC curve and ROC area
+
+            # First aggregate all false positive rates
+            all_fpr = np.unique(np.concatenate([fpr[i] for i in range(n_classes)]))
+
+            # Then interpolate all ROC curves at this points
+            mean_tpr = np.zeros_like(all_fpr)
+            for i in range(n_classes):
+                mean_tpr += interp(all_fpr, fpr[i], tpr[i])
+
+            # Finally average it and compute AUC
+            mean_tpr /= n_classes
+
+            fpr["macro"] = all_fpr
+            tpr["macro"] = mean_tpr
+            roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
+
+            # Plot all ROC curves
+            plt.figure()
+            plt.plot(fpr["micro"], tpr["micro"],
+                     label='мікро-усереднена ROC крива (площа = {0:0.2f})'
+                           ''.format(roc_auc["micro"]),
+                     color='deeppink', linestyle=':', linewidth=5)
+
+            plt.plot(fpr["macro"], tpr["macro"],
+                     label='макро-усереднена ROC крива (площа = {0:0.2f})'
+                           ''.format(roc_auc["macro"]),
+                     color='navy', linestyle=':', linewidth=5)
+
+            label_ukr = ["норма", "аутоімунний гепатит", "гепатит В", "гепатит С", "хвороба Вільсона"]
+
+            colors = cycle(['#FF0000', '#1B1BB3', '#269926', '#C30083', '#FFD300'])
+            for i, color in zip(range(n_classes), colors):
+                plt.plot(fpr[i], tpr[i], color=color, lw=lw, linewidth=3,linestyle='-',
+                         label='ROC крива класу {0} (площа = {1:0.2f})'
+                               ''.format(label_ukr[i], roc_auc[i]))
+
+            plt.plot([0, 1], [0, 1], 'k--', lw=lw, linewidth=3)
+            plt.xlim([-0.01, 1.0])
+            plt.ylim([-0.01, 1.05])
+            plt.xlabel('Частка ХИБНО ПОЗИТИВНИХ')
+            plt.ylabel('Частка ІСТИНО ПОЗИТИВНИХ')
+            plt.title('ROC обраної моделі')
+            plt.legend(loc="lower right")
+            plt.show()
 # ROC (only for diagnosis_code!)
-from sklearn.metrics import roc_curve, auc
+#roc()
+
+
+# ROC analysis and Cross-Validation
+def roc_cv (data, model_features, criterion, criterion_name, clf, clf_name, cv_number=5):
+
+    X = data[model_features].as_matrix()
+    y = data[criterion].as_matrix().astype(int)
+
+    from scipy import interp
+    from sklearn.metrics import roc_curve, auc
+    from sklearn.model_selection import StratifiedKFold
+
+    # Classification and ROC analysis
+
+    # Run classifier with cross-validation and plot ROC curves
+    cv = StratifiedKFold(n_splits=cv_number)
+
+    tprs = []
+    aucs = []
+    mean_fpr = np.linspace(0, 1, 100)
+
+    i = 0
+    for train, test in cv.split(X, y):
+        probas_ = clf.fit(X[train], y[train]).predict_proba(X[test])
+        # Compute ROC curve and area the curve
+        fpr, tpr, thresholds = roc_curve(y[test], probas_[:, 1])
+        tprs.append(interp(mean_fpr, fpr, tpr))
+        tprs[-1][0] = 0.0
+        roc_auc = auc(fpr, tpr)
+        aucs.append(roc_auc)
+        #plt.plot(fpr, tpr, lw=2, alpha=0.8, label='ROC fold %d (площа = %0.2f)' % (i+1, roc_auc))
+        i += 1
+    plt.plot([0, 1], [0, 1], linestyle='--', lw=2, color='k', alpha=.8)
+
+    mean_tpr = np.mean(tprs, axis=0)
+    mean_tpr[-1] = 1.0
+    mean_auc = auc(mean_fpr, mean_tpr)
+    std_auc = np.std(aucs)
+    plt.plot(mean_fpr, mean_tpr, color='r',linewidth=5,
+             label=r'Середня ROC (площа = %0.2f $\pm$ %0.2f)' % (mean_auc, std_auc),
+             lw=2, alpha=.8)
+
+    std_tpr = np.std(tprs, axis=0)
+    tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
+    tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
+    plt.fill_between(mean_fpr, tprs_lower, tprs_upper, color='grey', alpha=.2,
+                     label=r'$\pm$ 1 сер. квадр. відх.')
+
+    plt.xlim([-0.05, 1.05])
+    plt.ylim([-0.05, 1.05])
+    plt.xlabel('Частка ХИБНО ПОЗИТИВНИХ')
+    plt.ylabel('Частка ІСТИНО ПОЗИТИВНИХ')
+    plt.title('ROC моделі {} для {}'.format(criterion_name,clf_name))
+    plt.legend(loc="lower right")
+    plt.show()
+
+'''
+# pool of all classification settings
+poolParam = ["iswls","ishpb","ishpc","isauh","isnorm"]
+poolLabel = [wls, hpb, hpc, auh, norma]
+poolTests = {poolParam[a]:poolLabel[a] for a in range (len(poolParam))}
+kind_ukr = ["хвороба Вільсона - проти всіх", "гепатит В - проти всіх", "гепатит С - проти всіх",
+            "аутоімунний гепатит - проти всіх", "норма - патологія"]
 for name,model in clfs.items():
+    i = 0
     for param, label in poolTests.items():
+        roc_cv(data, model_features, param, kind_ukr[i], model, name, cv_number=5)
+        i = i + 1
+'''
 
-        from sklearn.multiclass import OneVsRestClassifier
-        from sklearn.preprocessing import label_binarize
-        from scipy import interp
-        from itertools import cycle
 
-        model = OneVsRestClassifier(model)
 
-        X_train = train[model_features]
-        y_train = label_binarize(train[param].astype(int).as_matrix(),classes=[0, 1, 2,3,4])
-        X_test = test[model_features]
-        y_test = label_binarize(test[param].astype(int).as_matrix(),classes=[0, 1, 2,3,4])
 
-        cur = model.fit(X_train, y_train)
-        # Test the classifier
-        y_score = cur.predict(X_test)
 
-        # Compute ROC curve and ROC area for each class
-        fpr = dict()
-        tpr = dict()
-        roc_auc = dict()
 
-        n_classes = 5
-        lw = 2
-        '''
-        print("test= {}".format(y_test))
-        print("score= {}".format(y_score))
-        '''
-        for i in range(n_classes):
-            fpr[i], tpr[i], _ = roc_curve(y_test[:, i], y_score[:, i])
-            roc_auc[i] = auc(fpr[i], tpr[i])
 
-        # Compute micro-average ROC curve and ROC area
-        fpr["micro"], tpr["micro"], _ = roc_curve(y_test.ravel(), y_score.ravel())
-        roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
 
-        # Compute macro-average ROC curve and ROC area
 
-        # First aggregate all false positive rates
-        all_fpr = np.unique(np.concatenate([fpr[i] for i in range(n_classes)]))
 
-        # Then interpolate all ROC curves at this points
-        mean_tpr = np.zeros_like(all_fpr)
-        for i in range(n_classes):
-            mean_tpr += interp(all_fpr, fpr[i], tpr[i])
 
-        # Finally average it and compute AUC
-        mean_tpr /= n_classes
 
-        fpr["macro"] = all_fpr
-        tpr["macro"] = mean_tpr
-        roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
 
-        # Plot all ROC curves
-        plt.figure()
-        plt.plot(fpr["micro"], tpr["micro"],
-                 label='мікро-усереднена ROC крива (площа = {0:0.2f})'
-                       ''.format(roc_auc["micro"]),
-                 color='deeppink', linestyle=':', linewidth=5)
 
-        plt.plot(fpr["macro"], tpr["macro"],
-                 label='макро-усереднена ROC крива (площа = {0:0.2f})'
-                       ''.format(roc_auc["macro"]),
-                 color='navy', linestyle=':', linewidth=5)
 
-        label_ukr = ["норма", "аутоімунний гепатит", "гепатит В", "гепатит С", "хвороба Вільсона"]
 
-        colors = cycle(['#FF0000', '#1B1BB3', '#269926', '#C30083', '#FFD300'])
-        for i, color in zip(range(n_classes), colors):
-            plt.plot(fpr[i], tpr[i], color=color, lw=lw, linewidth=3,linestyle='-',
-                     label='ROC крива класу {0} (площа = {1:0.2f})'
-                           ''.format(label_ukr[i], roc_auc[i]))
 
-        plt.plot([0, 1], [0, 1], 'k--', lw=lw, linewidth=3)
-        plt.xlim([-0.01, 1.0])
-        plt.ylim([-0.01, 1.05])
-        plt.xlabel('Частка ХИБНО ПОЗИТИВНИХ')
-        plt.ylabel('Частка ІСТИНО ПОЗИТИВНИХ')
-        plt.title('ROC обраної моделі')
-        plt.legend(loc="lower right")
-        plt.show()
+
+
+
+
 
 
 
