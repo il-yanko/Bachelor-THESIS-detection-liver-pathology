@@ -31,7 +31,7 @@ class MatplotlibWidget(QMainWindow):
         helpMenu = mainMenu.addMenu('Допомога')
 
         buttonLoaderMenu = QAction('Завантаження', self)
-        buttonLoaderMenu.setShortcut('Ctrl+L')
+        buttonLoaderMenu.setShortcut('Ctrl+D')
         buttonLoaderMenu.setStatusTip('Завантажити область інтересу для подальшого аналізу')
         buttonLoaderMenu.triggered.connect(self.choose_file)
         fileMenu.addAction(buttonLoaderMenu)
@@ -85,11 +85,19 @@ class MatplotlibWidget(QMainWindow):
         if (self.FlagLoaded):
             self.labelResult.setText(rs.signle_prediction(self.path))
         else:
-            self.labelResult.setText("Зображення не було обрано")
+            self.labelResult.setText("Зображення не було обрано!\n\nБудь ласка, оберіть зображення\nперед запуском аналізу")
+            self.msgBox4 = QMessageBox(self)
+            self.msgBox4.setIcon(QMessageBox.Warning)
+            self.msgBox4.setWindowTitle("Помилка! Не обрано зображення")
+            self.msgBox4.setText(
+                "Зображення не було обрано! Будь ласка, оберіть зображення перед запуском аналізу.")
+            self.msgBox4.exec_()
+
+
     def choose_file(self):
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getOpenFileName(self, "Оберіть зображення", "",
-                                                  "Зображення (*.bmp *.png *.jpeg *.jpg)", options=options)
+                                                  "Зображення (*.bmp *.png *.jpeg *.jpg);;nrrd(*.nrrd)", options=options)
         extensions = ['png', 'jpg', 'jpeg', 'bmp']
         fileExtension = (fileName.split('.'))[-1].lower()
         if fileName:
@@ -103,7 +111,12 @@ class MatplotlibWidget(QMainWindow):
                 self.FlagLoaded = True
             else:
                 self.labelResult.setText("Обраний тип файлу не підтримується.\nТипи файлів, що підтримуються:\nBMP, PNG, JPEG, JPG")
-
+                self.msgBox5 = QMessageBox(self)
+                self.msgBox5.setIcon(QMessageBox.Warning)
+                self.msgBox5.setWindowTitle("Помилка! Помилковий формат")
+                self.msgBox5.setText(
+                    "Обраний тип файлу не підтримується.\nТипи файлів, що підтримуються:\nBMP, PNG, JPEG, JPG.")
+                self.msgBox5.exec_()
 
 if __name__ == "__main__":
     app = QApplication([])
