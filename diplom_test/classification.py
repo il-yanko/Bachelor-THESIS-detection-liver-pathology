@@ -215,7 +215,7 @@ clf_models.append(make_pipeline (#PCA(n_components=2),
                                  tree.DecisionTreeClassifier(random_state=0,criterion='gini',max_features=2)))
 clf_names.append("Decision Tree Classifier")
 '''
-clf_models.append(make_pipeline (StandardScaler(),FactorAnalysis(n_components=10),#KernelPCA(n_components=10,kernel='rbf'),
+clf_models.append(make_pipeline (StandardScaler(),FactorAnalysis(n_components=23),#KernelPCA(n_components=10,kernel='rbf'),
                                  MLPClassifier(solver='lbfgs', alpha=1e-3, shuffle=True,
                                                activation='logistic', max_iter=1000000,
                                                hidden_layer_sizes=(5, 10), random_state=1),
@@ -304,32 +304,40 @@ poolTests = {poolParam[a]:poolLabel[a] for a in range (len(poolParam))}
 model_name = "Multi-layer Perceptron"
 for param, label in poolTests.items():
     # Options for model size
-    n_components = np.arange(2, int(len(model_features)/2), 10)
-    scores = list()
+    n_layers = np.arange(2, int(15), 1)
+    m_components = np.arange(2, int(30), 1)
+    super_scores = dict()
 
-    for model_size in n_components:
+    for layer in n_layers:
+        scores = list()
+        for component in m_components:
+            model = make_pipeline (StandardScaler(), FactorAnalysis(n_components=component),
+                                   #FactorAnalysis(n_components=model_size),
+                                   #KernelPCA(n_components=model_size,kernel='sigmoid'),
+                                   #LDA(n_components=model_size,solver='svd'),
+                                   MLPClassifier(solver='lbfgs', alpha=1e-3, shuffle=True,
+                                                 activation='logistic', max_iter=1000000,
+                                                 hidden_layer_sizes=(5, layer), random_state=1),
+                                   )
+            scores.append(k_fold_cv(data, model_features, model, model_name, param, cv_number=5))
+        print(scores,'\n')
+        best = max(scores)
+        super_scores[best] = 'MLP({}) + FA({})'.format(int(layer),int(component))
+        best_size = m_components[np.argmax(scores)]
+        print("Кращий результат - {}% дає модель зі {} шарів перцептрону".format(best,best_size))
+        plt.figure()
+        plt.plot(m_components, scores, label='ТОЧНІСТЬ класифікації', lw=5, color='r')
+        #plt.axhline(y=50, lw=3, color='k', linestyle='--', label='50% шанс')
+        plt.xlabel('Кількість компонент ФА')
+        plt.ylabel('Точність')
+        plt.ylim(50,100)
+        plt.legend(loc='lower right')
+        plt.title("БШП ({} шарів) + ФА".format(layer))
+        #plt.show()
+        plt.savefig('data/result/experiments/MLP({})_FA({}).png'.format(int(layer),int(component)),bbox_inches='tight')
 
-        model = make_pipeline (StandardScaler(),FactorAnalysis(n_components=model_size),
-                   #KernelPCA(n_components=model_size,kernel='sigmoid'),
-                    #LDA(n_components=model_size,solver='svd'),
-                    MLPClassifier(solver='lbfgs', alpha=1e-3, shuffle=True,
-                    activation='logistic', max_iter=1000000,
-                    hidden_layer_sizes=(5, 10), random_state=1),
-                  )
-        scores.append(k_fold_cv(data, model_features, model, model_name, param, cv_number=5))
-    print(scores,'\n')
-    best = max(scores)
-    best_size = n_components[np.argmax(scores)]
-    print("Кращий результат - {}% дає модель зі {} факторів".format(best,best_size))
-    plt.figure()
-    plt.plot(n_components, scores, label='ТОЧНІСТЬ класифікації', lw=5, color='r')
-    #plt.axhline(y=50, lw=3, color='k', linestyle='--', label='50% шанс')
-    plt.xlabel('Кількість компонент')
-    plt.ylabel('Точність')
-    plt.ylim(50,100)
-    plt.legend(loc='lower right')
-    plt.title("{} + {}".format(model_name, 'LDA'))
-    plt.show()
+    super_best = max(super_scores, key=int)
+    print("СУПЕР-кращий результат - {} = {}".format(super_best,super_scores[super_best]))
 
 
 

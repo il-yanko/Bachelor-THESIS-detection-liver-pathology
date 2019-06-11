@@ -72,12 +72,12 @@ class MatplotlibWidget(QMainWindow):
         buttonInfo.setStatusTip('Отримати інформацію про розробника')
         self.msgBox3 = QMessageBox(self)
         self.msgBox3.setIcon(QMessageBox.Information)
-        self.msgBox3.setWindowTitle("Додаток")
+        self.msgBox3.setWindowTitle("Розробник")
         self.msgBox3.setText("Цей програмний додаток було розроблено студентом 4 курсу Янковим І.О.\n"
                             "\nНТТУ КПІ ім. Ігоря Сікорського:\n"
                             "Факультет Біомедичної Інженерії (ФБМІ)\n"
                             "Академічна одиниця: група БС-52\n"
-                            "Науковий керівник: Настенко Є.А.")
+                            "Науковий керівник:\nд.б.н., к.т.н, с.н.с. Настенко Є.А.")
         buttonInfo.triggered.connect(self.msgBox3.exec_)
         helpMenu.addAction(buttonInfo)
 
