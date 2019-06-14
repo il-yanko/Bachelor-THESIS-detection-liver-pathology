@@ -3,3 +3,4 @@ gpb = Hepatitis B
 gpc = Hepatitis C
 vls = Wilson's disease
 auh = autoimmune hepatitis
+cf = cystic fibrosis
