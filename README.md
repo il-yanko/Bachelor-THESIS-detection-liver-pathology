@@ -10,8 +10,6 @@ It is my thesis project at Igor Sikorsky Kyiv Polytechnic Institute.
 - [x] GLSZM (Gray-Level Size Zone Matrix)
 - [ ] GLAM (Gray-Level  Aura  Matrix)
 - [ ] GLNM (Gray-Level  Neighbor  Matrix)
-
-### Feature Selection Techniques:
 - [x] Principal Component Analysis
 
 ### Classification Approaches:
@@ -24,7 +22,7 @@ It is my thesis project at Igor Sikorsky Kyiv Polytechnic Institute.
 - [x] Multi-layer Perceptron
 
 ### Classificator Estimator:
-- [x] 10-fold Cross-Validation
+- [x] 5-fold Cross-Validation
 
 
 ## References ##
