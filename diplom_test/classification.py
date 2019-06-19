@@ -175,13 +175,14 @@ hpb = ['notHPB','HPB']
 hpc = ['notHPC','HPC']
 auh = ['notAuh','auh']
 norma = ['patho','norma']
+cf = ['notCf', 'Cf']
 
 cols_to_drop = ['id','data_source','diagnosis_code','isnorm','isauh','ishpb','ishpc','iswls']
 model_features = [col for col in train.columns if col not in cols_to_drop]
 
 # pool of all classification settings
-poolParam = ["diagnosis_code","iswls","ishpb","ishpc","isauh","isnorm"]
-poolLabel = [all, wls, hpb, hpc, auh, norma]
+poolParam = ["diagnosis_code","iswls","ishpb","ishpc","isauh","isnorm","iscf"]
+poolLabel = [all, wls, hpb, hpc, auh, norma, cf]
 
 
 poolTests = {poolParam[a]:poolLabel[a] for a in range (len(poolParam))}
@@ -214,14 +215,14 @@ clf_models.append(make_pipeline (#PCA(n_components=2),
                                  StandardScaler(),
                                  tree.DecisionTreeClassifier(random_state=0,criterion='gini',max_features=2)))
 clf_names.append("Decision Tree Classifier")
-'''
-clf_models.append(make_pipeline (StandardScaler(),FactorAnalysis(n_components=23),#KernelPCA(n_components=10,kernel='rbf'),
+
+clf_models.append(make_pipeline (StandardScaler(),KernelPCA(n_components=24,kernel='rbf'),#,FactorAnalysis(n_components=29)
                                  MLPClassifier(solver='lbfgs', alpha=1e-3, shuffle=True,
                                                activation='logistic', max_iter=1000000,
-                                               hidden_layer_sizes=(5, 10), random_state=1),
+                                               hidden_layer_sizes=(5, 13), random_state=1),
                                  ))
 clf_names.append("Multi-layer Perceptron")
-'''
+
 clf_models.append(make_pipeline (PCA(n_components=2),
                                  StandardScaler(),
                                  linear_model.SGDClassifier(max_iter=1000000, tol=1e-3),
@@ -244,15 +245,21 @@ clf_models.append(make_pipeline (PCA(n_components=3), #StandardScaler(),
                                  svm.SVC(gamma='scale', kernel='rbf')))
 clf_names.append("C-Support Vector Machine")
 
-clf_models.append(make_pipeline (PCA(n_components=2), StandardScaler(),
-                                 GradientBoostingClassifier(n_estimators=100, learning_rate=1.0,
-                                                max_depth=8, random_state=0)))
+clf_models.append(make_pipeline (StandardScaler(), KernelPCA(n_components=10,kernel='rbf'),
+                                 GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=10,
+                                                            random_state=0, loss='deviance')
+                                 )
+                  )
 clf_names.append("Gradient Boosting")
 
-clf_models.append(make_pipeline (PCA(n_components=3), StandardScaler(),
-                                 KNeighborsClassifier(5)))
-clf_names.append("k-Nearest Neighbors")
 '''
+
+clf_models.append(make_pipeline (StandardScaler(), KernelPCA(n_components=24,kernel='rbf'),
+                                 KNeighborsClassifier(5, algorithm='auto', metric='manhattan')
+                                 )
+                  )
+clf_names.append("k-Nearest Neighbors")
+
 
 
 clfs = {clf_names[a]:clf_models[a] for a in range(len(clf_names))}
@@ -278,7 +285,7 @@ def k_fold_cv(data, model_features, clf, clf_name, criterion, cv_number=10):
     X = data[model_features]
     y = data[criterion].astype(int)
 
-    print("\n{}:\n================================================\nPredictable"
+    print("================================================\n{}:\nPredictable "
           "attribute: {}\n".format(clf_name, criterion))
     # cross_val = KFold(n_splits=5, shuffle=True, random_state=1)
     # for train, test in cross_val.split(data):
@@ -289,55 +296,87 @@ def k_fold_cv(data, model_features, clf, clf_name, criterion, cv_number=10):
     print('Accuracy = {}%'.format(rez))
     return rez
 
+
+# pool of all classification settings
+poolParam = ["diagnosis_code"]#,"iswls","ishpb","ishpc","isauh","isnorm","iscf"]
+poolLabel = [all]#, wls, hpb, hpc, auh, norma, cf]
+poolTests = {poolParam[a]:poolLabel[a] for a in range (len(poolParam))}
+
+
 #K-fold
 '''
 for name,model in clfs.items():
     for param, label in poolTests.items():
-        k_fold_cv(data, model_features, model, name, param, cv_number=5)
+        k_fold_cv(data, model_features, model, name, param, cv_number=10)
 '''
 
-# pool of all classification settings
-poolParam = ["diagnosis_code"]#,"iswls","ishpb","ishpc","isauh","isnorm"]
-poolLabel = [all]#, wls, hpb, hpc, auh, norma]
-poolTests = {poolParam[a]:poolLabel[a] for a in range (len(poolParam))}
-# відбір моделі
-model_name = "Multi-layer Perceptron"
+# відбір моделі !!!!!!!!!!
+
 for param, label in poolTests.items():
     # Options for model size
-    n_layers = np.arange(2, int(15), 1)
-    m_components = np.arange(2, int(30), 1)
+
+    #n_layers = np.arange(2, int(20), 1)
+    n_layers = list([1])
+    m_components = np.arange(2, int(40), 1)
     super_scores = dict()
 
     for layer in n_layers:
         scores = list()
         for component in m_components:
-            model = make_pipeline (StandardScaler(), FactorAnalysis(n_components=component),
+            model_name = "Multi-layer Perceptron"
+            model_name = "{} ({} layers, {} components)".format(model_name, layer, component)
+            model = make_pipeline (StandardScaler(), KernelPCA(n_components=component,kernel='rbf'),
                                    #FactorAnalysis(n_components=model_size),
                                    #KernelPCA(n_components=model_size,kernel='sigmoid'),
                                    #LDA(n_components=model_size,solver='svd'),
-                                   MLPClassifier(solver='lbfgs', alpha=1e-3, shuffle=True,
-                                                 activation='logistic', max_iter=1000000,
-                                                 hidden_layer_sizes=(5, layer), random_state=1),
+                                   RandomForestClassifier(max_depth=10, n_estimators=100,
+                                                          max_features=2, random_state=0,
+                                                          #class_weight='balanced',
+                                                          criterion='gini', bootstrap=True)
+                                   #svm.SVC(max_iter=-1, gamma='scale', kernel='rbf')
+                                   #GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=10,
+                                   #                            random_state=0,loss='deviance', max_features=component)
+                                   #KNeighborsClassifier(5, algorithm='auto', metric='manhattan')
+                                   #linear_model.LogisticRegression(max_iter=1000000, C=1e3, penalty="l2",
+                                   #                               solver='newton-cg', multi_class='multinomial')
+                                   # MLPClassifier(solver='lbfgs', alpha=1e-3, shuffle=True,
+                                   #               activation='logistic', max_iter=1000000,
+                                   #               hidden_layer_sizes=(5, layer), random_state=0),
                                    )
             scores.append(k_fold_cv(data, model_features, model, model_name, param, cv_number=5))
         print(scores,'\n')
         best = max(scores)
-        super_scores[best] = 'MLP({}) + FA({})'.format(int(layer),int(component))
-        best_size = m_components[np.argmax(scores)]
-        print("Кращий результат - {}% дає модель зі {} шарів перцептрону".format(best,best_size))
+        best_component = m_components[np.argmax(scores)+1]
+        super_scores[best] = 'Random Forest({}) + KPCA-RBF({})'.format(layer, int(best_component))
+        #print("Кращий результат {}-шаровго MLP - {}%\n дає модель зі {} компонент".format(layer, best,best_component))
+        print("Кращий результат RF - {}%\n дає модель зі {} компонент".format(layer, best, best_component))
         plt.figure()
         plt.plot(m_components, scores, label='ТОЧНІСТЬ класифікації', lw=5, color='r')
         #plt.axhline(y=50, lw=3, color='k', linestyle='--', label='50% шанс')
-        plt.xlabel('Кількість компонент ФА')
+        plt.xlabel('Кількість компонент ЯМГК (РБФ)')
         plt.ylabel('Точність')
         plt.ylim(50,100)
         plt.legend(loc='lower right')
-        plt.title("БШП ({} шарів) + ФА".format(layer))
+        #plt.title("Багатошаровий перцептрони ({} шарів) + ЯМГК (РБФ)".format(layer))
+        plt.title("Випадковий Ліс + ЯМГК (РБФ)")
         #plt.show()
-        plt.savefig('data/result/experiments/MLP({})_FA({}).png'.format(int(layer),int(component)),bbox_inches='tight')
+        plt.savefig('data/result/experiments/RF({})_KPCA({}).png'.format(int(layer),int(best_component)),bbox_inches='tight')
 
     super_best = max(super_scores, key=int)
     print("СУПЕР-кращий результат - {} = {}".format(super_best,super_scores[super_best]))
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -488,41 +527,17 @@ def roc_cv (data, model_features, criterion, criterion_name, clf, clf_name, cv_n
 
 '''
 # pool of all classification settings
-poolParam = ["iswls","ishpb","ishpc","isauh","isnorm"]
-poolLabel = [wls, hpb, hpc, auh, norma]
+poolParam = ["diagnosis_code","iswls","ishpb","ishpc","isauh","isnorm","iscf"]
+poolLabel = [all, wls, hpb, hpc, auh, norma, cf]
 poolTests = {poolParam[a]:poolLabel[a] for a in range (len(poolParam))}
 kind_ukr = ["хвороба Вільсона - проти всіх", "гепатит В - проти всіх", "гепатит С - проти всіх",
-            "аутоімунний гепатит - проти всіх", "норма - патологія"]
+            "аутоімунний гепатит - проти всіх", "норма - патологія", "кістозний фіброз - проти всіх"]
 for name,model in clfs.items():
     i = 0
     for param, label in poolTests.items():
         roc_cv(data, model_features, param, kind_ukr[i], model, name, cv_number=5)
         i = i + 1
 '''
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
