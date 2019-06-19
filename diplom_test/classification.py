@@ -317,7 +317,7 @@ for param, label in poolTests.items():
 
     #n_layers = np.arange(2, int(20), 1)
     n_layers = list([1])
-    m_components = np.arange(2, int(40), 1)
+    m_components = np.arange(2, int(30), 1)
     super_scores = dict()
 
     for layer in n_layers:
@@ -325,42 +325,46 @@ for param, label in poolTests.items():
         for component in m_components:
             model_name = "Multi-layer Perceptron"
             model_name = "{} ({} layers, {} components)".format(model_name, layer, component)
-            model = make_pipeline (StandardScaler(), KernelPCA(n_components=component,kernel='rbf'),
+            model = make_pipeline (StandardScaler(), #PCA(n_components=component),
+                                   KernelPCA(n_components=component,kernel='rbf'),
                                    #FactorAnalysis(n_components=model_size),
                                    #KernelPCA(n_components=model_size,kernel='sigmoid'),
                                    #LDA(n_components=model_size,solver='svd'),
-                                   RandomForestClassifier(max_depth=10, n_estimators=100,
-                                                          max_features=2, random_state=0,
-                                                          #class_weight='balanced',
-                                                          criterion='gini', bootstrap=True)
+                                   #RandomForestClassifier(max_depth=100, n_estimators=100,
+                                   #                       max_features=int(2), random_state=0,
+                                   #                       #class_weight='balanced',
+                                   #                       criterion='gini', bootstrap=True)
                                    #svm.SVC(max_iter=-1, gamma='scale', kernel='rbf')
                                    #GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=10,
                                    #                            random_state=0,loss='deviance', max_features=component)
                                    #KNeighborsClassifier(5, algorithm='auto', metric='manhattan')
-                                   #linear_model.LogisticRegression(max_iter=1000000, C=1e3, penalty="l2",
-                                   #                               solver='newton-cg', multi_class='multinomial')
-                                   # MLPClassifier(solver='lbfgs', alpha=1e-3, shuffle=True,
+                                   linear_model.LogisticRegression(max_iter=1000000, C=1e3, penalty="l2",
+                                                                  solver='newton-cg', multi_class='multinomial')
+                                   #MLPClassifier(solver='lbfgs', alpha=1e-3, shuffle=True,
                                    #               activation='logistic', max_iter=1000000,
                                    #               hidden_layer_sizes=(5, layer), random_state=0),
                                    )
             scores.append(k_fold_cv(data, model_features, model, model_name, param, cv_number=5))
         print(scores,'\n')
         best = max(scores)
-        best_component = m_components[np.argmax(scores)+1]
-        super_scores[best] = 'Random Forest({}) + KPCA-RBF({})'.format(layer, int(best_component))
+        best_component = m_components[np.argmax(scores)]
+        super_scores[best] = 'Logistic Regression({}) + KPCA-RBF({})'.format(layer, int(best_component))
         #print("Кращий результат {}-шаровго MLP - {}%\n дає модель зі {} компонент".format(layer, best,best_component))
-        print("Кращий результат RF - {}%\n дає модель зі {} компонент".format(layer, best, best_component))
+        print("Кращий результат LR - {}%\n дає модель зі {} компонент".format(best, best_component))
         plt.figure()
         plt.plot(m_components, scores, label='ТОЧНІСТЬ класифікації', lw=5, color='r')
         #plt.axhline(y=50, lw=3, color='k', linestyle='--', label='50% шанс')
+        plt.axhline(y=best, lw=3, color='k', linestyle='--', label=str(best)+'%')
+        plt.axvline(x=best_component, lw=1, color='k', linestyle='-')
         plt.xlabel('Кількість компонент ЯМГК (РБФ)')
         plt.ylabel('Точність')
         plt.ylim(50,100)
         plt.legend(loc='lower right')
-        #plt.title("Багатошаровий перцептрони ({} шарів) + ЯМГК (РБФ)".format(layer))
-        plt.title("Випадковий Ліс + ЯМГК (РБФ)")
+        #plt.title("Багатошаровий перцептрон ({} шарів) + ЯМГК (РБФ)".format(layer))
+        plt.title("Логістична Регресія + ЯМГК (РБФ)")
         #plt.show()
-        plt.savefig('data/result/experiments/RF({})_KPCA({}).png'.format(int(layer),int(best_component)),bbox_inches='tight')
+        #plt.savefig('data/result/experiments/MLP({})_KPCA_RBF({}).png'.format(int(layer),int(best_component)),bbox_inches='tight')
+        plt.savefig('data/result/experiments/LR_KPCA_RBF({}).png'.format(int(best_component)), bbox_inches='tight')
 
     super_best = max(super_scores, key=int)
     print("СУПЕР-кращий результат - {} = {}".format(super_best,super_scores[super_best]))
@@ -368,17 +372,64 @@ for param, label in poolTests.items():
 
 
 
+# RFECV
+'''
+# Recursive feature elimination with cross-validation
+def compute_RFECV (data, model_features, clf, clf_name, criterion, cv_number=5):
 
+    from sklearn.model_selection import StratifiedKFold
+    from sklearn.feature_selection import RFECV
 
+    X = data[model_features]
+    y = data[criterion]
 
+    print("================================================\n{}:\nPredictable "
+          "attribute: {}\n".format(clf_name, criterion))
+    # cross_val = KFold(n_splits=5, shuffle=True, random_state=1)
+    # for train, test in cross_val.split(data):
+    #    print('train: %s, test: %s' % (train, test))
 
+    rfecv = RFECV(estimator=clf, step=1, cv=cv_number, scoring='accuracy')
+    rfecv.fit(X, y)
 
+    print("Optimal number of features : %d" % rfecv.n_features_)
 
+    # Plot number of features VS. cross-validation scores
+    plt.figure()
+    plt.xlabel("Number of features selected")
+    plt.ylabel("Cross validation score (nb of correct classifications)")
+    plt.plot(range(1, len(rfecv.grid_scores_) + 1), rfecv.grid_scores_)
+    plt.show()
 
+from sklearn.pipeline import Pipeline
 
+class PipelineRFE(Pipeline):
+    def fit(self, X, y=None, **fit_params):
+        super(PipelineRFE, self).fit(X, y, **fit_params)
+        self.feature_importances_ = self.steps[-1][-1].feature_importances_
+        return self
 
-
-
+for param, label in poolTests.items():
+    from sklearn.ensemble import ExtraTreesClassifier
+    #from sklearn.svm import LinearSVC
+    model_name = "SVR"
+    model = PipelineRFE(
+        [
+            ('std_scaler', StandardScaler()),
+            # RandomForestClassifier(max_depth=100, n_estimators=100,
+            #                       max_features=int(2), random_state=0,
+            #                       #class_weight='balanced',
+            #                       criterion='gini', bootstrap=True)
+            ("ET", ExtraTreesClassifier(random_state=0, n_estimators=1000))
+            #('SVR',LinearSVC(random_state=0, tol=1e-5))#max_iter=-1, gamma='scale', kernel='linear'))
+            # GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=10,
+            #                            random_state=0,loss='deviance', max_features=component)
+            #('LR',linear_model.LogisticRegression(max_iter=1000000, C=1e3, penalty="l2",
+            #                                solver='newton-cg', multi_class='multinomial'))
+        ]
+    )
+    compute_RFECV(data, model_features, model, model_name, param, cv_number=5)
+'''
 
 
 # REDO !!!!!!!!!!!!!!!!!!!!
