@@ -22,12 +22,15 @@ def create_directory(directory):
 
 
 sl = "/"
-folderNames = ["norm", "auh", "hpb", "hpc", "wls"]
+folderNames = ["norm", "auh", "hpb", "hpc", "wls"]#, "cf"]
 # add "dsh" to add dysholia (almost like a norm)
 folderNumber = len(folderNames)
 
+
+
+
 # Save all PNG-s as NRRD-s
-'''
+
 # Declare the source of the data
 data = dict()
 for i in range(folderNumber):
@@ -55,7 +58,11 @@ for i in range (folderNumber):
         # Save the image as NRRD
         nrrd.write(image_path_to, image)
         nrrd.write(label_path_to, label)
-'''
+
+
+
+
+
 
 data_array = list()
 # Declare the source of NRRD data

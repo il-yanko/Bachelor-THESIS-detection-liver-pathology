@@ -105,16 +105,23 @@ def signle_prediction(path=img_path):
     data = pd.read_csv("data/result/single.csv", ";")
     data = data.iloc[0:, 1:data.shape[1]]
 
+
+
     # load the model from disk
     model_name = 'Multi-layer Perceptron'
-    accuracy = [73,83,90,86,84,84]
-    label_ukr = [["норма", "аутоімунний гепатит", "гепатит В", "гепатит С", "хвороба Вільсона"],
-                 ['НЕ хвороба Вільсона', 'хвороба Вільсона'], ['НЕ гепатит В', 'гепатит В'], ['НЕ гепатит С', 'гепатит С'],
-                 ['НЕ аутоімунний гепатит', 'аутоімунний гепатит'], ['патологія', 'норма']]
-    kind_ukr = ["серед усіх хвороб", "хвороба Вільсона - проти всіх", "гепатит В - проти всіх", "гепатит С - проти всіх",
-               "аутоімунний гепатит - проти всіх", "норма - патологія"]
-    poolParam = ["diagnosis_code", "iswls", "ishpb", "ishpc", "isauh", "isnorm"]
-    text = "Тип класифікатора: <b>{0}</b><br><br>\n\n".format(model_name)
+    accuracy = [77,83,90,86,84,85,85]
+    label_ukr = [["norm", "autoimmune hepatitis", "hepatitis В", "hepatitis С", "Wilson disease", "cystic fibrosis"],
+                 ['NOT Wilson disease', 'Wilson disease'], ['NOT hepatitis В', 'hepatitis В'], ['NOT hepatitis С', 'hepatitis С'],
+                 ['NOT autoimmune hepatitis', 'autoimmune hepatitis'], ['pathology', 'norm'], ['NOT cystic fibrosis', 'cystic fibrosis']]
+
+    kind_ukr = ["all diseases", "Wilson disease VS all", "hepatitis В VS all", "hepatitis С VS all",
+               "autoimmune hepatitis VS all", "norm VS pathologies", "cystic fibrosis VS all"]
+    poolParam = ["diagnosis_code", "iswls", "ishpb", "ishpc", "isauh", "isnorm", "iscf"]
+    text = "Classifier: <b>{0}</b><br><br>\n\n".format(model_name)
+
+
+
+
 
     models = [0,5]
     for number in models:
@@ -125,7 +132,7 @@ def signle_prediction(path=img_path):
 
         # Test the classifier
         y_pred = int(loaded.predict(data))
-        part = 'Точність: <b>{1}</b>%<br>\nКласифікація: [{0}]<br>\n[РЕЗУЛЬТАТ]: <b>{2}</b><br><br>\n\n'.format(kind_ukr[number], accuracy[number],label_ukr[number][y_pred])
+        part = 'Accuracy: <b>{1}</b>%<br>\nClassification: [{0}]<br>\n[RESULTS]: <b>{2}</b><br><br>\n\n'.format(kind_ukr[number], accuracy[number],label_ukr[number][y_pred])
         text = text + part
     text = '<font size="2"> {0} </font>'.format(text)
     print(text)
