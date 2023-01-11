@@ -1,6 +1,8 @@
 # Texture Analysis of Medical Ultrasound images (Liver)
 
-It is my thesis project at Igor Sikorsky Kyiv Polytechnic Institute.
+This is my bachelor thesis project at Igor Sikorsky Kyiv Polytechnic Institute.
+
+The project is a classification system for pathologies of the hepatobiliary system in children, based on the analysis of their liver ultrasound images using radiomics (computational methods for texture analysis) and machine learning.
 
 ### Feature Extracting Techniques:
 - [x] GLCM (Gray-Level Co-Occurrence Matrix)
